@@ -1,0 +1,5 @@
+exportPattern("^[[:alpha:]]+")
+importFrom("grDevices", "rgb")
+importFrom("graphics", "arrows", "contour", "image", "par", "points")
+importFrom("stats", "na.omit")
+importFrom("utils", "flush.console")

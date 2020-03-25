@@ -1,0 +1,3 @@
+FarmData                Data set for wind farm layout optimization
+FarmVars                List object with control variables
+Profit					Profit function, the core to wflo
