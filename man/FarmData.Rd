@@ -13,7 +13,7 @@ FarmData
 }
 
 \format{
-	A \code{list} object containing four matrices, each containing 25 x 25 values at a raster resolution of 200 x 200 m (note that for the larger data set downloadable using \code{\link{AcquireData}}, each matrix contains 4400 x 3250 values):\cr
+	A \code{list} object containing seven matrices, each containing 25 x 25 values at a raster resolution of 200 x 200 m (note that for the larger data set downloadable using \code{\link{AcquireData}}, each matrix contains 4400 x 3250 values):\cr
 	\cr
 	\code{$AdjustedYield}: Yield is average annual energy production (AEP). According to FGW technical guidelines, AEP is adjusted due to different location qualities to obtain a better guess at the marketable energy output. Interpret these values directly as 'megawatt hours per year'.\cr
 	\cr
@@ -22,6 +22,12 @@ FarmData
 	\code{$WindDirection}: Average wind directions in degrees (azimuth system).\cr
 	\cr
 	\code{$SDDirection}: Standard deviations of wind directions in degrees (azimuth system).\cr
+	\cr
+	\code{$Elevation}: Terrain relief (elevation in meters).\cr
+	\cr
+	\code{$Slope}: Terrain slope in degrees.\cr
+	\cr
+	\code{$SlopeDirection}: Direction of hillside in degrees.\cr
 }
 
 \source{

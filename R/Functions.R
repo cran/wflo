@@ -38,33 +38,95 @@ ValidSetup <- function(x, y) #x, y \in R^n
 Geo2Ari <- function(g)
 {
 	if (g == -1) return(-1)
+
 	return((450 - g) %% 360)
 }
 
-IsInWake <- function(Cone, Direction)
+JensenTrapezoid <- function(WindDir, Point, x)
 {
-	if (Cone[1] < 0) Cone[1] <- 360 + Cone[1]
-	Cone[2] <- Cone[2] %% 360
+  x = x * 1.1 #Add a little margin.
 
-	u <- as.numeric()
-	v <- as.numeric()
+  alpha <- 0.5 / (log(e$FarmVars$z / e$FarmVars$z0))
+  alpha_x <- alpha * x
+  r <- e$FarmVars$r0 + alpha_x
 
-	u[1] <- sin(Cone[1] * pi / 180)
-	u[2] <- sin(Cone[2] * pi / 180)
+  r0U <- (1 / e$FarmVars$MeterWidth) * e$FarmVars$r0
+  rU <- (1 / e$FarmVars$MeterWidth) * r
+  xU <- (1 / e$FarmVars$MeterWidth) * x
 
-	v[1] <- cos(Cone[1] * pi / 180)
-	v[2] <- cos(Cone[2] * pi / 180)
+  AAngle <- WindDir + 90
+  AAngle <- AAngle %% 360
 
-	u <- sort(u)
-	v <- sort(v)
+  BAngle <- WindDir + 270
+  BAngle <- BAngle %% 360
 
-	Dir_u <- sin(Direction * pi / 180)
-	Dir_v <- cos(Direction * pi / 180)
+  EAngle <- WindDir + 180
+  EAngle <- EAngle %% 360
 
-	if (Dir_u >= u[1] & Dir_u <= u[2]) return(TRUE)
-	if (Dir_v >= v[1] & Dir_v <= v[2]) return(TRUE)
+  ##
 
-	return(FALSE)
+  Displace <- c(r0U, 0)
+
+  Mat <- cbind(c(cos(AAngle * pi / 180), sin(AAngle * pi / 180)), c(-sin(AAngle * pi / 180), cos(AAngle * pi / 180)))
+  A <- (Mat %*% Displace) + Point
+
+  Mat <- cbind(c(cos(BAngle * pi / 180), sin(BAngle * pi / 180)), c(-sin(BAngle * pi / 180), cos(BAngle * pi / 180)))
+  B <- (Mat %*% Displace) + Point
+
+  ##
+
+  Displace <- c(xU, 0)
+
+  Mat <- cbind(c(cos(EAngle * pi / 180), sin(EAngle * pi / 180)), c(-sin(EAngle * pi / 180), cos(EAngle * pi / 180)))
+  E <- (Mat %*% Displace) + Point
+
+  ##
+
+  Displace <- c(rU, 0)
+
+  Mat <- cbind(c(cos(AAngle * pi / 180), sin(AAngle * pi / 180)), c(-sin(AAngle * pi / 180), cos(AAngle * pi / 180)))
+  D <- (Mat %*% Displace) + E
+
+  Mat <- cbind(c(cos(BAngle * pi / 180), sin(BAngle * pi / 180)), c(-sin(BAngle * pi / 180), cos(BAngle * pi / 180)))
+  C <- (Mat %*% Displace) + E
+
+  ##
+
+  RetVal <- cbind(A, B, C, D)
+  colnames(RetVal) <- c("A", "B", "C", "D")
+
+  return(RetVal)
+}
+
+PointInPolygon <- function(PointMat, TestPoint) # Jordan test.
+{
+  CrossProdTest <- function(A, B, C)
+  {
+    if (B[2] > C[2])
+    {
+      Temp <- B
+      B <- C
+      C <- Temp
+    }
+
+    if (A[2] <= B[2] | A[2] > C[2]) return(1)
+
+    Delta <- ((B[1] - A[1]) * (C[2] - A[2])) - ((B[2] - A[2]) * (C[1] - A[1]))
+
+    if (Delta >= 0) return(1)
+
+    return(-1)
+  }
+
+  P <- cbind(PointMat[, ncol(PointMat)], PointMat)
+
+  t <- -1
+  for (i in 1:(ncol(P) - 1))
+  {
+    t <- t * CrossProdTest(TestPoint, P[, i], P[, i + 1])
+    if (t == 0) break
+  }
+  if (t < 0) return(FALSE) else return(TRUE)
 }
 
 JensenAngle <- function(x)
@@ -103,7 +165,7 @@ GetAngle <- function(x1, y1, x2, y2) #As seen from point 2, where is point 1? Gi
 	{
 		if (APrime[2] >= 0)
 		{
-			#Nothing to do here
+			# Nothing to do here.
 		} else
 		{
 			Degrees <- 360 - Degrees
@@ -130,12 +192,14 @@ PairPenalty <- function(x1, y1, x2, y2, Dirs, SDs) #As seen from point 2.
 	if (PointsAngle == -1) return(0)
 
 	PointInfo <- GetDirInfo(x2, y2, Dirs, SDs)
+	PointInfo[1] <- Geo2Ari(PointInfo[1])
+	PointInfo[1] <- PointInfo[1] + 180
+	PointInfo[1] <- PointInfo[1] %% 360
 
 	Distance <- sqrt((x2 - x1) ^ 2 + (y2 - y1) ^ 2) * e$FarmVars$MeterWidth
-	JensenCone <- JensenAngle(Distance)
-	JensenCone <- c(PointsAngle - JensenCone, PointsAngle + JensenCone)
+	JensenCone <- JensenTrapezoid(PointInfo[1], c(x2, y2), Distance)
 
-	if (IsInWake(JensenCone, PointInfo[1]))
+	if (PointInPolygon(JensenCone, c(x1, y1)))
 	{
 		return(JensenFactor(Distance))
 	} else
@@ -170,10 +234,10 @@ Profit <- function(X)
 	M <- M %*% t(M)
 	for (i in 1:n)
 	{
-		for (j in 1:n)
-		{
-			M[i, j] <- M[i, j] * PairPenalty(x[j], y[j], x[i], y[i], Dirs, SDs)
-		}
+	  for (j in 1:n)
+	  {
+	    M[i, j] <- M[i, j] * PairPenalty(x[j], y[j], x[i], y[i], Dirs, SDs)
+	  }
 	}
 	M[M == 0] <- 1
 	p <- rep(1, n)
@@ -234,6 +298,7 @@ ImposeVectorField <- function(xNum = 5, yNum = 5, ColMain = "black", ColBand = "
 		for (j in seq(from = 0, to = 1, length.out = yNum))
 		{
 			ThisArrowInfos <- GetDirInfo(i, j, Dirs, SDs)
+			ThisArrowInfos[1] <- Geo2Ari(ThisArrowInfos[1])
 
 			ThisArrow <- GetArrow(i, j, ThisArrowInfos[1], Frac)
 			MyArrows$x0[Counter] <- ThisArrow[1]
@@ -267,6 +332,8 @@ ImposeVectorField <- function(xNum = 5, yNum = 5, ColMain = "black", ColBand = "
 
 PlotResult <- function(Result)
 {
+  if (!any(names(Result) == "par")) stop("Not a valid optimizer result provided.")
+
   if (exists("FarmData", envir = e, inherits = FALSE))
   {
 	  Adj <- e$FarmData[[1]][e$FarmVars$StartPoint:e$FarmVars$EndPoint, e$FarmVars$StartPoint:e$FarmVars$EndPoint]
@@ -320,7 +387,84 @@ PlotResult <- function(Result)
 	points(xPlot, yPlot, col = "gold4", pch = 16)
 }
 
-AcquireData = function(Folder)
+ShowWakePenalizers <- function(Result, Cones = TRUE, VectorField = TRUE)
+{
+  if (!any(names(Result) == "par")) stop("Not a valid optimizer result provided.")
+
+  if (exists("FarmData", envir = e, inherits = FALSE))
+  {
+    Dirs <- e$FarmData[[3]][e$FarmVars$StartPoint:e$FarmVars$EndPoint, e$FarmVars$StartPoint:e$FarmVars$EndPoint]
+    SDs <- e$FarmData[[4]][e$FarmVars$StartPoint:e$FarmVars$EndPoint, e$FarmVars$StartPoint:e$FarmVars$EndPoint]
+  } else
+  {
+    Dirs <- FarmData[[3]][e$FarmVars$StartPoint:e$FarmVars$EndPoint, e$FarmVars$StartPoint:e$FarmVars$EndPoint]
+    SDs <- FarmData[[4]][e$FarmVars$StartPoint:e$FarmVars$EndPoint, e$FarmVars$StartPoint:e$FarmVars$EndPoint]
+  }
+
+  xSel <- seq(from = 1, to = length(Result$par) - 1, by = 2)
+  x <- Result$par[xSel]
+  y <- Result$par[xSel + 1]
+
+  n <- length(x)
+  M <- rep(1, n)
+  M <- M %*% t(M)
+  for (i in 1:n)
+  {
+    for (j in 1:n)
+    {
+      M[i, j] <- M[i, j] * PairPenalty(x[j], y[j], x[i], y[i], Dirs, SDs)
+    }
+  }
+  M[M == 0] <- 1
+
+  Causers <- 0
+  Sufferers <- 0
+  for (i in 1:n)
+  {
+    if (mean(M[, i]) != 1) Sufferers <- c(Sufferers, i)
+    if (mean(M[i, ]) != 1) Causers <- c(Causers, i)
+  }
+  Causers <- Causers[2:length(Causers)]
+  Sufferers <- Sufferers[2:length(Sufferers)]
+
+  if (any(is.na(Causers)) | any(is.na(Sufferers)))
+  {
+    message("Nothing to show, no wake effects present.")
+    return(invisible(NULL))
+  }
+
+  plot(x[c(Causers, Sufferers)], y[c(Causers, Sufferers)], ylim = c(0, 1), xlim = c(0, 1), xlab = "", ylab = "")
+  for (i in 1:length(Sufferers))
+  {
+    points(x[Sufferers[i]], y[Sufferers[i]], col = "gold4", pch = 16)
+    text(x[Sufferers[i]], y[Sufferers[i]], labels = Sufferers[i], pos = 3)
+  }
+  for (i in 1:length(Causers))
+  {
+    points(x[Causers[i]], y[Causers[i]], col = "grey", pch = 16)
+    text(x[Causers[i]], y[Causers[i]], labels = Causers[i], pos = 3)
+
+    if (Cones)
+    {
+      WindDir <- GetDirInfo(x[Causers[i]], y[Causers[i]], Dirs, SDs)
+      WindDir <- Geo2Ari(WindDir[1])
+      WindDir <- WindDir + 180
+      WindDir <- WindDir %% 360
+      JensenCone <- JensenTrapezoid(WindDir, c(x[Causers[i]], y[Causers[i]]), e$FarmVars$MeterWidth * 2)
+
+      lines(x = c(JensenCone[1, 1], JensenCone[1, 2]), y = c(JensenCone[2, 1], JensenCone[2, 2]), col = "red")
+      lines(x = c(JensenCone[1, 2], JensenCone[1, 3]), y = c(JensenCone[2, 2], JensenCone[2, 3]), col = "red")
+      lines(x = c(JensenCone[1, 3], JensenCone[1, 4]), y = c(JensenCone[2, 3], JensenCone[2, 4]), col = "red")
+      lines(x = c(JensenCone[1, 4], JensenCone[1, 1]), y = c(JensenCone[2, 4], JensenCone[2, 1]), col = "red")
+    }
+  }
+  if (VectorField) ImposeVectorField(xNum = 7, yNum = 7, ColMain = "gray", ColBand = "gray30", DoSDs = TRUE)
+  legend("topleft", c("Causers", "Sufferers"), pch = 16, col = c("grey", "gold4"))
+
+  return(invisible(M))
+}
+
+AcquireData <- function(Folder)
 {
 	if (!interactive())
 	{
@@ -328,24 +472,24 @@ AcquireData = function(Folder)
 		return(invisible(NULL))
 	}
 
-	URL = "http://wflo.auf.uni-rostock.de/FarmData.RData"
+	URL <- "http://wflo.auf.uni-rostock.de/FarmData.RData"
 
 	message(paste("Downloading data file from ", URL, sep = ""))
 	message(paste("Writing to directory ", Folder, sep = ""))
 	message("Proceed? Hit 'n' to cancel or any other key to continue.")
-	retVal = readline()
+	retVal <- readline()
 	if (substr(retVal, 1, 1) == "n")
 	{
 		message("Cancelled.")
 		return(invisible(NULL))
 	}
 
-	FileLocation = paste(Folder, "/FarmData.RData", sep = "")
+	FileLocation <- paste(Folder, "/FarmData.RData", sep = "")
 
 	if (file.exists(FileLocation))
 	{
 		message("File exists. Really proceed? Hit 'n' to cancel or any other key to continue.")
-		retVal = readline()
+		retVal <- readline()
 		if (substr(retVal, 1, 1) == "n")
 		{
 			message("Cancelled.")
@@ -364,9 +508,9 @@ AcquireData = function(Folder)
 		}
 	}
 
-	message("Starting download (118 MB), please wait...")
+	message("Starting download (222 MB), please wait...")
 	flush.console()
-	Ret = try(suppressWarnings(utils::download.file(URL, FileLocation, quiet = TRUE)), silent = TRUE)
+	Ret <- try(suppressWarnings(utils::download.file(URL, FileLocation, quiet = TRUE)), silent = TRUE)
 
 	if (class(Ret) == "try-error")
 	{
@@ -376,7 +520,7 @@ AcquireData = function(Folder)
 
 	if (Ret == 0 & file.exists(FileLocation))
 	{
-		if (file.info("FarmData.RData")$size != 124606617)
+		if (file.info("FarmData.RData")$size != 233636819)
 		{
 			message("File seems to be corrupt. Download interrupted? Please try again.")
 			return(invisible(NULL))

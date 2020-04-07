@@ -19,7 +19,7 @@ FarmVars$r0 <- 45
 
 	if (file.exists("FarmData.RData"))
 	{
-		if (file.info("FarmData.RData")$size == 124606617)
+		if (file.info("FarmData.RData")$size == 233636819)
 		{
 			packageStartupMessage("File found. Loading...")
 			flush.console()

@@ -23,7 +23,7 @@ GetAngle(x1, y1, x2, y2)
 	}
 	\item{y2}{
 		must be a single value. Provide the \code{y} location of the second turbine.
-	}	
+	}
 }
 
 \details{
@@ -43,7 +43,7 @@ Note that this function returns an angle in arithmetic degrees notation. To conv
 }
 
 \seealso{
-Use \code{\link{JensenAngle}} to compute the wake cone and with it, use \code{\link{IsInWake}} to see if another turbine B is in turbine A's wake.
+Use \code{\link{JensenAngle}} to compute the wake cone and with it, use \code{\link{JensenTrapezoid}} to see if another turbine B is in turbine A's wake.
 }
 
 \examples{

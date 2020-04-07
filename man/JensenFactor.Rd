@@ -38,7 +38,7 @@ Note that for Jensen's multiple wake model, wake penalties from several potentia
 }
 
 \seealso{
-Use \code{\link{JensenAngle}} to compute the wake cone and with it, use \code{\link{IsInWake}} to see if another turbine B is in turbine A's wake. Apply \code{JensenFactor} only if this is the case.
+Use \code{\link{JensenAngle}} to compute the wake cone and with it, use \code{\link{JensenTrapezoid}} to see if another turbine B is in turbine A's wake. Apply \code{JensenFactor} only if this is the case.
 }
 
 \examples{
