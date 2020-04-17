@@ -8,12 +8,18 @@ This function draws the adjusted yields of the wind farm under investigation usi
 }
 
 \usage{
-PlotResult(Result)
+PlotResult(Result, DoLabels = FALSE, Labels = "IDs")
 }
 
 \arguments{
 	\item{Result}{
 		must be an optimization result as returned by an optimizer such as \code{\link{optim}}. Usually, this will be a \code{list} at least containing '$par'. Most optimizers comply with this R standard. If your optimizer does not, wrap its result into a list containing an object '$par' containing the optimization result (i.e., a vector of points).
+	}
+\item{DoLabels}{
+		a boolean that indicates whether labels should be plotted next to the points. Defaults to FALSE.
+	}
+\item{Labels}{
+		a vector of length n = N / 2, can be numeric values or strings. Defines the labels to be shown if \code{DoLabels = TRUE}. Defaults to "IDs", in which case the points are sequently numbered from 1:n. \code{Labels} is ignored if \code{DoLabels = FALSE}.
 	}
 }
 
@@ -30,7 +36,7 @@ Carsten Croonenbroeck
 }
 
 \seealso{
-Use \code{\link{PlotResult}} to visualize the optimization result.
+Use \code{\link{Profit}} to obtain an optimization result.
 }
 
 \examples{

@@ -2,7 +2,7 @@ utils::globalVariables(c("FarmData"))
 
 Cost <- function(x, y) #x, y \in R^n
 {
-	return(rep(e$FarmVars$UnitCost, length(x)))
+	return(rep(e$FarmVars$UnitCost, min(length(x), length(y))))
 }
 
 Yield <- function(x, y, Adj) #x, y \in R
@@ -330,7 +330,61 @@ ImposeVectorField <- function(xNum = 5, yNum = 5, ColMain = "black", ColBand = "
 	arrows(x0 = MyArrows$x0, y0 = MyArrows$y0, x1 = MyArrows$x1, y1 = MyArrows$y1, col = ColMain, length = 0.1)
 }
 
-PlotResult <- function(Result)
+ProfitContributors <- function(Result)
+{
+  if (inherits(Result, "list")) if (any(names(Result) == "par")) Result <- Result$par
+  if (!inherits(Result, "numeric")) stop("Object is neither a vector nor optimizer result.")
+
+  xSel <- seq(from = 1, to = length(Result) - 1, by = 2)
+  x <- Result[xSel]
+  y <- Result[xSel + 1]
+
+  if (any(x < 0) | any(x > 1) | any(y < 0) | any(y > 1)) stop("At leat one point is out of bounds.")
+
+  if (exists("FarmData", envir = e, inherits = FALSE))
+  {
+    Adj <- e$FarmData[[1]][e$FarmVars$StartPoint:e$FarmVars$EndPoint, e$FarmVars$StartPoint:e$FarmVars$EndPoint]
+    Dirs <- e$FarmData[[3]][e$FarmVars$StartPoint:e$FarmVars$EndPoint, e$FarmVars$StartPoint:e$FarmVars$EndPoint]
+    SDs <- e$FarmData[[4]][e$FarmVars$StartPoint:e$FarmVars$EndPoint, e$FarmVars$StartPoint:e$FarmVars$EndPoint]
+  } else
+  {
+    Adj <- FarmData[[1]][e$FarmVars$StartPoint:e$FarmVars$EndPoint, e$FarmVars$StartPoint:e$FarmVars$EndPoint]
+    Dirs <- FarmData[[3]][e$FarmVars$StartPoint:e$FarmVars$EndPoint, e$FarmVars$StartPoint:e$FarmVars$EndPoint]
+    SDs <- FarmData[[4]][e$FarmVars$StartPoint:e$FarmVars$EndPoint, e$FarmVars$StartPoint:e$FarmVars$EndPoint]
+  }
+
+  n <- length(x)
+
+  M <- rep(1, n)
+  M <- M %*% t(M)
+  for (i in 1:n)
+  {
+    for (j in 1:n)
+    {
+      M[i, j] <- M[i, j] * PairPenalty(x[j], y[j], x[i], y[i], Dirs, SDs)
+    }
+  }
+  M[M == 0] <- 1
+  p <- rep(1, n)
+  for (i in 1:n)
+  {
+    for (j in 1:n)
+    {
+      p[i] <- p[i] * M[j, i]
+    }
+  }
+
+  PointYield <- as.numeric()
+  for (i in 1:n) PointYield[i] <- Yield(x[i], y[i], Adj)
+
+  Revenue <- (PointYield * e$FarmVars$Price) * p
+  retVal <- Revenue - Cost(x, y)
+  retVal <- cbind(1:length(x), retVal)
+  colnames(retVal) <- c("Turbine", "Profit")
+  return(retVal)
+}
+
+PlotResult <- function(Result, DoLabels = FALSE, Labels = "IDs")
 {
   if (!any(names(Result) == "par")) stop("Not a valid optimizer result provided.")
 
@@ -385,6 +439,16 @@ PlotResult <- function(Result)
 	}
 
 	points(xPlot, yPlot, col = "gold4", pch = 16)
+	if (DoLabels)
+	{
+	  if (Labels[1] == "IDs") Labels <- 1:length(xPlot)
+	  if (length(Labels) != length(xPlot))
+	  {
+	    warning("Length of labels object must match the number of points.")
+	    return(invisible(NULL))
+	  }
+	  text(xPlot, yPlot, labels = Labels, pos = 3, col = "white")
+	}
 }
 
 ShowWakePenalizers <- function(Result, Cones = TRUE, VectorField = TRUE)
@@ -459,7 +523,7 @@ ShowWakePenalizers <- function(Result, Cones = TRUE, VectorField = TRUE)
     }
   }
   if (VectorField) ImposeVectorField(xNum = 7, yNum = 7, ColMain = "gray", ColBand = "gray30", DoSDs = TRUE)
-  legend("topleft", c("Causers", "Sufferers"), pch = 16, col = c("grey", "gold4"))
+  legend("topleft", c("Causers", "Sufferers"), bg = "white", pch = 16, col = c("grey", "gold4"))
 
   return(invisible(M))
 }
@@ -512,7 +576,7 @@ AcquireData <- function(Folder)
 	flush.console()
 	Ret <- try(suppressWarnings(utils::download.file(URL, FileLocation, quiet = TRUE)), silent = TRUE)
 
-	if (class(Ret) == "try-error")
+	if (inherits(Ret, "try-error"))
 	{
 		message("File was not downloaded. Internet connection error? Please try again.")
 		return(invisible(NULL))

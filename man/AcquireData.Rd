@@ -1,7 +1,7 @@
 \name{AcquireData}
 \alias{AcquireData}
 
-\title{Downloads the larger data set for entire Germany}
+\title{Downloads the larger data set for entire Germany.}
 
 \description{
 Convenience function that downloads the larger data set covering the entire area of Germany and saves it to the specified directory. This data set can replace the smaller sub sample data set that is part of this package.

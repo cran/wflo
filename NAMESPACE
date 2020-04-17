@@ -1,5 +1,6 @@
-exportPattern("^[[:alpha:]]+")
+#exportPattern("^[[:alpha:]]+")
+export(e, Cost, Yield, GetDirInfo, ValidSetup, Geo2Ari, JensenTrapezoid, PointInPolygon, JensenAngle, JensenFactor, GetAngle, PairPenalty, Profit, GetArrow, ImposeVectorField, PlotResult, ShowWakePenalizers, AcquireData, ProfitContributors)
 importFrom("grDevices", "rgb")
 importFrom("graphics", "arrows", "contour", "image", "par", "points", "legend", "lines", "plot", "text")
 importFrom("stats", "na.omit")
-importFrom("utils", "flush.console")
+importFrom("utils", "flush.console", "packageVersion")

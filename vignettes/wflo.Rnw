@@ -1,4 +1,5 @@
 \documentclass[nojss]{jss}
+%\documentclass{jss}
 
 %\VignetteIndexEntry{wflo}
 %\VignetteKeyword{wflo, wind farm layout optimization}
@@ -63,59 +64,71 @@ We provide a new and unified standard for the field of wind farm layout optimiza
 
 \section[Introduction]{Introduction}\label{section:Introduction}
 
-Wind farm layout optimization (WFLO), i.e. the question of how to optimally arrange a set of wind turbines inside a wind park, is a problem that has been analyzed for quite some time. In mathematics, this problem is typically seen as a constraint optimization (i.e. maximization or minimization) task. However, while the objective space encompasses a typically rather simple surface in $\mathbb{R}^3$, ``feature space'' is a high-dimensional, mostly non-continuous (hence, non-differentiable), multimodal space of a-priori unknown complexity. Furthermore, as several points in that space are sought-after and these points possess a strongly interdependent behavior due to wake effects in the wind farm, the WFLO problem is considered to be $\mathcal{NP-}$hard (see \citealp{Garey1979} for a definition).\\
-Approaches to solving this problem can not only be classified a) according to the wake model used, but also b) according to the class of optimization approaches (gradient-based approaches and gradient-free algorithms) or c) according to the target function class. Most approaches to WFLO incorporate a physical model for inner-farm wake effects. The model by \cite{Jensen1983} is most popular, as it still provides a quite well approximation of measured wakes in actual farms, despite the model's simplicity. See \cite{Shakoor2016} and the references therein for a comprehensive overview of WFLO literature employing the Jensen model. However, some contributions employ other wake models. For instance, \cite{Kirchner2018} use a Gaussian wake model.\\
+Wind farm layout optimization (WFLO), i.e. the question of how to optimally arrange a set of wind turbines inside a wind farm, is a problem that has been analyzed for quite some time. In mathematics, this problem is typically seen as a constraint optimization (i.e. maximization or minimization) task. However, while the objective space encompasses a typically rather simple surface in $\mathbb{R}^3$, ``feature space'' is a high-dimensional, mostly non-continuous (hence, non-differentiable), multimodal space of ex ante unknown complexity. Furthermore, as several points in that space are sought-after and these points possess a strongly interdependent behavior due to wake effects in the wind farm, the WFLO problem is considered to be $\mathcal{NP-}$hard (see \citealp{Garey1979} for a definition).\\
+Approaches to solving this problem can not only be classified a) according to the wake model used, but also b) according to the class of optimization approaches (gradient-based approaches and gradient-free algorithms), or c) according to the target function class. Most approaches to WFLO incorporate a physical model for inner-farm wake effects. The model by \cite{Jensen1983} is most popular, as it provides a quite well approximation of measured wakes in actual farms, despite the model's simplicity. See \cite{Shakoor2016} and the references therein for a comprehensive overview of WFLO literature employing the Jensen model. However, some contributions employ other wake models. For instance, \cite{Kirchner2018} use a Gaussian wake model.\\
 Most optimizers employ gradient-free methods, as these methods (e.g. metaheuristic algorithms such as genetic algorithms (GA) or simulated annealing) perform quite well at exploring the feature space, given that this space is not of too high dimension. For example, \cite{Chen2013}, \cite{Park2019}, and \cite{Yang2019} use these methods. Higher-dimensional spaces however are the domain of gradient-based approaches, as \cite{Thomas2018} point out.\\
 Many researchers use wind farm efficiency or annual energy production (AEP) as their target function, e.g. \cite{Park2019}. However, a more realistic approach considers what wind farm operators are really after: Earning money. Therefore, as \cite{Gualtieri2019} points out, AEP maximization is not a meaningful goal. Instead, researchers recently tend to use economically driven target functions. \cite{Wu2020} use a profit-driven function, which also enables them to flexibly incorporate cost or revenue influencing drivers of the optimization problem, e.g. inner-farm wiring. As an alternative, \cite{Yang2019} discuss wake effect uniformity instead of AEP or profit maximization as an alternative target.\\
 \cite{Antonini2020} point out the complex terrain aspects of the WFLO problem, an issue that \cite{Thomas2018} try to relax. However, as this is just a means of modifying the problem at hand to ease its handling, it even emphasizes the necessity for a unified setting and goal in order to focus on the methodology to solve that goal. Thus, researchers even start WFLO competitions to have participants compete on a unified setting. \cite{Baker2019} show the outcome of such a competition. Their competition does not only provide a unified target and unified data, it also serves as a benchmark that every participant can use to evaluate his/her own methodology idea/contribution.\\
-Using \proglang{R} by \cite{R}, package \pkg{windfarmGA} provides a genetic algorithm implementation to deal with WFLO. The methodology can be explored at \url{https://windfarmga.shinyapps.io/windga_shiny/} as well. However, as this is an approach at solving the problem, it still does not fully describe the problem itself, nor does it provide a data set or a benchmark. At this point, package \pkg{wflo} comes into place: It provides high-quality and highly accurate data, which can be used for both, developing a methodology as well as benchmarking it. It does not, however, provide an actual solution. \pkg{wflo} is merely a sandbox for solution researchers. The package also provides a set of modular functions around the WFLO problem, providing an economically driven target function implementing Jensen's multiple wake effects model, plug-in functions for cost and revenue and a set of parameters. In this article, we discuss the components of package \pkg{wflo} and its intended usage in great detail. Section \ref{section:Data and Functions} presents the data and sheds light on the functions and their utility. Section \ref{section:Use Cases} provides a few usage examples and section \ref{section:Conclusion} draws a brief conclusion.
+Using \proglang{R} by \cite{R}, package \pkg{windfarmGA} provides a genetic algorithm implementation to deal with WFLO. The methodology can be explored at \url{https://windfarmga.shinyapps.io/windga_shiny/} as well. However, as this is an approach at solving the problem, it still does not fully describe the problem itself, nor does it provide a data set or a benchmark. At this point, package \pkg{wflo} (see \url{https://CRAN.R-project.org/package=wflo}) comes into place: It provides high-quality and highly accurate data, which can be used for both, developing a methodology as well as benchmarking it. It does not, however, provide an actual solution. \pkg{wflo} is merely a sandbox for solution researchers. The package also provides a set of modular functions around the WFLO problem, providing an economically driven target function implementing Jensen's multiple wake effects model, plug-in functions for cost and revenue and a set of parameters. In this article, we discuss the components of package \pkg{wflo} and its intended usage in great detail. Section \ref{section:Data and Functions} presents the data and sheds light on the functions and their utility. Section \ref{section:Use Cases} provides a few usage examples and section \ref{section:Conclusion} draws a brief conclusion.
 
 \section{Data and Functions}\label{section:Data and Functions}
 
 \subsection{Data Description}\label{subsection:Data Description}
 
-Package \pkg{wflo} deals with a high-quality data set available in a list object \code{FarmData} after the package is loaded. The data stem from DWD (Deutscher Wetterdienst, German Meteorological Service) and NASA (National Aeronautics and Space Administration, SRTM data set, Shuttle Radar Topography Mission) and have been preprocessed, i.e. the station data are spatially interpolated using Geographic Information System (GIS) software\footnote{Using inverse distance weighted (IDW) method, see \url{https://desktop.arcgis.com/en/arcmap/10.3/tools/3d-analyst-toolbox/how-idw-works.htm} for documentation.} and the wind direction data are temporally averaged by transforming polar coordinates to cartesian coordinates and then computing the vector averages.\\
-The package comes with a subset of the entire data set. Due to CRAN\footnote{Comprehensive R Archive Network.} package size limitations, it is not possible to enclose the entire data set within the package. However, the full data set can be downloaded conveniently using the built-in function \code{AcquireData()}. As a parameter, the function accepts the directory to where the file will be saved. For example, the user may choose to use the current working directory obtained via \code{getwd()} as a target directory. After file \code{FarmData.RData} is downloaded, it is loaded automatically. It replaces the built-in data set in a list object in environment \code{e}, easily accessible via \code{e$FarmData}. On load, the package checks whether the file is present in the current working directory and if so, loads the file automatically. Otherwise, \pkg{wflo} automatically falls back to basic mode.\\
-List object \code{e$FarmData} has seven slots. Each of them contains a matrix that has 4,400 $\times$ 3,250 elements in full mode and 25 $\times$ 25 elements in basic mode. The subset in basic mode is ``carved'' out of the entire data set at position [2000:2024, 2000:2024], so it is nested in the full data set. The 4,400 $\times$ 3,250 elements in full mode cover the entire area of Germany. They represent a raster data set at a rather accurate resolution of 200 $\times$ 200 meters. Slot 1 of the list object, named \code{AdjustedYield}, contains adjusted potential AEP (``yield'') for German onshore sites. AEP is computed based on FGW technical guidelines (Fördergesellschaft Windenergie und andere Dezentrale Energien, support organization for wind energy and other types of decentralized energy). Those technical guidelines are mandatory to use in Germany, are stipulated in the German Renewable Energy Act (\citealp{EEG2017}), and are obtainable at \url{https://wind-fgw.de/shop/technical-guidelines/?lang=en}. The guidelines themselves are based on IEC 61400-12-1, the international standard on ``power performance measurements of electricity producing wind turbines'' by the International Electrotechnical Commission, IEC. According to \cite{EEG2017}, AEP computed that way must be multiplied by a correction factor. That factor is based on a specific location's quality in order to compensate for several market regulations in Germany. Users can interpret the contained values immediately as AEP in ``megawatt hours per year'' (MWh/a), however we decided to name that variable \textit{adjusted} yield, as researchers computing AEP on their own may obtain slightly different values. Figure \ref{graph:Adj} visualizes the data.\\
-Slot 2, named \code{WindSpeed}, contains temporally averaged wind speed in meters per second (m/s), while slot 3, named \code{WindDirection}, contains temporally averaged wind direction in degrees (azimuth). Figure \ref{graph:WD_WS} presents both in a joint image. Slot 4, named \code{SDDirection}, contains the standard deviations of wind directions after temporally averaging. So far, standard deviations are not used anywhere in the package. However, they may provide important insight into the volatility of wind directions at each point and may thus be relevant for, e.g., computing confidence bands. Slot 5 holds the terrain elevation in meters, slot 6 provides terrain slope in degrees and slot 7 gives the direction of hillside in degrees as well.\\
-The second data object in the \code{e} environment installed by \pkg{wflo} is \code{e$FarmVars}. This list object contains a set of variables required for the functions of \pkg{wflo}. \code{$StartPoint}, \code{$EndPoint} and \code{$Width} control which area from the data set is used as the current wind farm area. In general, \code{$Width} describes width and height of the area used, in raster points. As the raster resolution is 200 m, the default value of \code{$Width} = 25 results in a square of 5 $\times$ 5 km. For convenience, \code{FarmVars} also contains the farm size in meters in its variable \code{$MeterWidth}, which is computed as
+Package \pkg{wflo} deals with a high-quality data set available in a list object \code{FarmData} after the package is loaded. The data stem from DWD (Deutscher Wetterdienst, German Meteorological Service) and NASA (National Aeronautics and Space Administration, SRTM data set, Shuttle Radar Topography Mission) and have been preprocessed, i.e. the station data are spatially interpolated using Geographic Information System (GIS) software\footnote{We use the inverse distance weighted (IDW) method, see \url{https://desktop.arcgis.com/en/arcmap/10.3/tools/3d-analyst-toolbox/how-idw-works.htm} for documentation.} and the wind direction data are temporally averaged by transforming polar coordinates to cartesian coordinates and then computing the vector averages.\\
+The package comes with a subset of the entire data set. Due to CRAN\footnote{Comprehensive R Archive Network.} package size limitations, it is not possible to enclose the entire data set within the package. However, the full data set can be downloaded conveniently using the built-in function \code{AcquireData()}. As a parameter, the function accepts the directory to where the file will be saved. For example, the user may choose to use the current working directory obtained via \code{getwd()} as a target directory. After file \code{FarmData.RData} is downloaded, it is loaded automatically. While the reduced, built-in data set is accessible via list object \code{FarmData}, once the full data set is available, it replaces the built-in data set by being embedded into user writeable environment \code{e}, easily accessible via \code{e$FarmData}. Therefore, one object does not mask the other. All subsequent functions check for the full data set being present in environment \code{e} accordingly. On load, the package checks whether the file is present in the current working directory and if so, loads the file automatically. Otherwise, \pkg{wflo} automatically falls back to basic mode, using the built-in data set.\\
+List object \code{FarmData} (or \code{e$FarmData}) has seven slots. Each of them contains a matrix that has 4,400 $\times$ 3,250 elements in full mode and 25 $\times$ 25 elements in basic mode. The subset in basic mode is ``carved'' out of the entire data set at position [2000:2024, 2000:2024], so it is nested in the full data set. The 4,400 $\times$ 3,250 elements in full mode cover the entire area of Germany. They represent a raster data set at a rather accurate resolution of 200 $\times$ 200 meters. Slot 1 of the list object, named \code{AdjustedYield}, contains adjusted potential AEP (``yield'') for German onshore sites. AEP is computed based on FGW technical guidelines (Fördergesellschaft Windenergie und andere Dezentrale Energien, support organization for wind energy and other types of decentralized energy). Those technical guidelines are mandatory to use in Germany, are stipulated in the German Renewable Energy Act (\citealp{EEG2017}), and are obtainable at \url{https://wind-fgw.de/shop/technical-guidelines/?lang=en}. The guidelines themselves are based on IEC 61400-12-1, the international standard on ``power performance measurements of electricity producing wind turbines'' by the International Electrotechnical Commission, IEC. According to \cite{EEG2017}, AEP computed that way must be multiplied by a correction factor. That factor is based on a specific location's quality in order to compensate for several market regulations in Germany. Users can interpret the contained values immediately as AEP in ``megawatt hours per year'' (MWh/a), however we decide to name that variable \textit{adjusted} yield, as researchers computing AEP on their own may obtain slightly different values. Figure \ref{graph:Adj} visualizes the data.\\
+Slot 2, named \code{WindSpeed}, contains temporally averaged wind speed in meters per second (m/s), while slot 3, named \code{WindDirection}, contains temporally averaged wind direction in degrees (azimuth). Figure \ref{graph:WD_WS} presents both in a joint image. Slot 4, named \code{SDDirection}, contains the standard deviations of wind directions after temporally averaging. So far, standard deviations are not used anywhere in the package. However, they may provide important insight into the volatility of wind directions at each point and may thus be relevant for, e.g., computing confidence bands. Slot 5 (\code{Elevation}) holds the terrain elevation in meters, slot 6 (\code{Slope}) provides terrain slope in degrees, and slot 7 (\code{SlopeDirection}) gives the direction of hillside, in degrees as well. Figure \ref{graph:Slots} presents a joint image plot for the data in the seven slots (built-in data set).\\
+The second data object in the \code{e} environment installed by \pkg{wflo} is \code{e$FarmVars}. This list object contains a set of variables required for the functions of \pkg{wflo} and, among other things, controls the ``data window'' of consideration if the full data set is present. \code{$StartPoint}, \code{$EndPoint} and \code{$Width} control which area from the data set is used as the current wind farm area. In general, \code{$Width} describes width (and height, as the area is assumed to be a square) of the area used, in raster points. As the raster resolution is 200 m, the default value of \code{$Width} = 25 results in a square of 5 $\times$ 5 km. For convenience, \code{e$FarmVars} also contains the farm size in meters in its variable \code{$MeterWidth}, which is computed as
 
 \begin{Code}
-  FarmVars$MeterWidth <- FarmVars$Width * 200.
+  e$FarmVars$MeterWidth <- e$FarmVars$Width * 200.
 \end{Code}
 
-In full mode, \code{$StartPoint} = 2000, while in basic mode, \code{$StartPoint} = 1. In both cases, \code{$EndPoint} is computed based on \code{$StartPoint} and \code{$Width} following
+In full mode (downloaded data set), \code{$StartPoint} = 2000, while in basic mode (built-in data set), \code{$StartPoint} = 1. In both cases, \code{$EndPoint} is computed based on \code{$StartPoint} and \code{$Width} following
 
 \begin{Code}
-  FarmVars$EndPoint <- FarmVars$StartPoint + FarmVars$Width - 1,
+  e$FarmVars$EndPoint <- e$FarmVars$StartPoint + e$FarmVars$Width - 1,
 \end{Code}
 
-which results in \code{FarmVars$EndPoint} = 2024 in full mode and \code{FarmVars$EndPoint} = 24 in basic mode. Furthermore, \code{FarmVars} contains \code{$MeterMinDist}, which holds the minimum distance between any two turbines in the wind farm. Its default value is 500 meters. As internally, the wind farm is considered to be a unit square (automatically and irrespective of the current \code{$StartPoint}, \code{$Width}, \code{$EndPoint}, and \code{$MeterWidth}), \code{FarmVars} also contains a variable \code{$MinDist} as
+which results in \code{e$FarmVars$EndPoint} = 2024 in full mode and \code{e$FarmVars$EndPoint} = 24 in basic mode. Furthermore, \code{e$FarmVars} contains \code{$MeterMinDist}, which holds the minimum distance between any two turbines in the wind farm. Its default value is 500 meters. As internally, the wind farm is considered to be a unit square (automatically and irrespective of the current \code{$StartPoint}, \code{$Width}, \code{$EndPoint}, and \code{$MeterWidth}), \code{e$FarmVars} also contains a variable \code{$MinDist} for the minimum distance in unit space as
 
 \begin{Code}
-  FarmVars$MinDist <- FarmVars$MeterMinDist / FarmVars$MeterWidth,
+  e$FarmVars$MinDist <- e$FarmVars$MeterMinDist / e$FarmVars$MeterWidth,
 \end{Code}
 
-which consequently defaults to 500 / 5000 = 0.1, i.e. one tenth of the farm square's height or width. \code{FarmVars} also contains variables \code{$z}, \code{$z0}, and \code{$r0} which contain the turbines' hub height in meters (defaults to \code{FarmVars$z} = 100), the terrain's roughness length required for Jensen's wake model (defaults to \code{FarmVars$z0} = 0.1), and the turbines' rotor radius in meters (defaults to \code{FarmVars$r0} = 45). Users should adjust these values according to their turbine specifications or use the default values for benchmarking. Finally, \code{FarmVars} contains the variables \code{$UnitCost} and \code{$Price}. \code{$UnitCost} is meant to carry a single turbine's yearly cost. If, for example, total turbine installation costs are 2 mio. EUR and the projected life span of the turbine is 20 years, then the yearly cost is roughly 100,000 EUR, which is also the default value for this item. Additional cost components such as wiring, (non-linear) amortization, maintenance, opportunity cost, or others can be modeled using an alternative cost function which can be plugged in easily (see below). Similarly, \code{$Price} contains the sale price per megawatt hour. This defaults to an empirically reasonable average of 100 EUR. However, if revenue is to be modeled in a more sophisticated fashion than using ``constant price times sale volume'', the necessary adjustments are easily performed (once again, see below).
+which consequently defaults to 500 / 5000 = 0.1, i.e. one tenth of the farm square's height or width. \code{e$FarmVars} also contains variables \code{$z}, \code{$z0}, and \code{$r0}, which contain the turbines' hub height in meters (defaults to \code{e$FarmVars$z} = 100), the terrain's roughness length required for Jensen's wake model (defaults to \code{e$FarmVars$z0} = 0.1), and the turbines' rotor radius in meters (defaults to \code{e$FarmVars$r0} = 45). Users should adjust these values according to their turbine specifications or use the default values for benchmarking. Furthermore, \code{e$FarmVars} contains the variables \code{$UnitCost} and \code{$Price}. \code{$UnitCost} is meant to carry a single turbine's yearly cost. If, for example, total turbine installation costs are 2 mio. EUR and the projected life span of the turbine is 20 years, then the yearly cost is roughly 100,000 EUR, which is also the default value for this item. Additional cost components such as wiring, (non-linear) amortization, maintenance, opportunity cost, or others can be modeled using an alternative cost function which can be plugged in easily (see below). Similarly, \code{$Price} contains the sale price per megawatt hour. This defaults to an empirically reasonable average of 100 EUR. However, if revenue is to be modeled in a more sophisticated fashion than using ``constant price times sale volume'', the necessary adjustments are easily performed (once again, see below). Finally, \code{e$FarmVars} contains a vector object \code{$BenchmarkSolution}, which holds 40 values (20 pairs of x and y coordinates) representing a setup of 20 turbines within the standard data set terrain. It has been obtained using optimizer \code{genoud()} of package \pkg{rgenoud} by \cite{Mebane2011} and provides a standard of comparison for future optimizers or can be used as starting points for further exploring the feature space.\\
+Changing, say, \code{$r0} or \code{$z}, but more immediately, \code{$StartPoint} and \code{$EndPoint}, turns the problem into an entirely new setup. For instance, assuming the full data set is present, selecting
+
+<<Newfield, eval = FALSE>>=
+e$FarmVars$StartPoint <- 1800
+e$FarmVars$Width <- 100
+e$FarmVars$EndPoint <- e$FarmVars$StartPoint + e$FarmVars$Width - 1
+e$FarmVars$MeterWidth <- 200 * e$FarmVars$Width
+e$FarmVars$MinDist <- e$FarmVars$MeterMinDist / e$FarmVars$MeterWidth
+@
+
+provides an entirely new (and larger) testing ground. A huge multitude of optimization areas is accessible that way, even allowing to immediately select costal regions, mountain regions, or areas known to be especially apt or unsuitable to wind power plants.
 
 \subsection{Functions}\label{subsection:Functions}
 
-The central function to \pkg{wflo} is \code{Profit()}. It takes a set of points in the unit square (turbine locations) and based on the adjusted AEP in the farm specified via the \code{FarmVars} settings object, checks whether the layout is valid (i.e. minimum distances are met for all turbines), computes multiple Jensen wake penalties, generates the total marketable power production of the specified layout, takes cost and sale price into consideration and finally computes the farm's economic profit. Since most numeric optimizers by default operate as a minimizer, \code{Profit()} returns the negative profit, i.e. a negative number for positive actual profit values and a positive number if cost is greater than revenue (negative actual profit).\\
-\code{Profit()} calls \code{Cost()}, which by default is a stub function only returning the \code{$UnitCost} value from the \code{FarmVars} object. For more sophisticated cost components, users should replace the \code{Cost()} by their own cost model, and \code{Profit()} will operate on it immediately. Similarly, \code{Yield()} is a stub looking up the adjusted AEP based on a given turbine location. If yield or revenue should follow a more sophisticated model, replacing \code{Yield()} by that model would be the way to go. \code{Profit()} will use it accordingly. Note, however, that if the new yield model also takes care of sale prices (or takes non-constant sale prices into account), \code{FarmVars$UnitCost} should be ``disabled'' by setting it to a value of one.\\
-Finally, \code{PlotResult()} is a convenience function that takes an optimizer result, i.e. an object as returned by \code{optim()}, visualizes the adjusted yield ``landscape'' in the current wind farm setting, superimposes a contour plot and a vector field representing the wind directions and then draws the provided points (turbines). For example, a usual optimization run can be performed via
+The central function to \pkg{wflo} is \code{Profit()}. It takes a set of points in the unit square (turbine locations) and based on the adjusted AEP in the farm specified via the \code{e$FarmVars} settings object, checks whether the layout is valid (i.e. minimum distances are met for all turbines), computes multiple Jensen wake penalties, generates the total marketable power production of the specified layout, takes cost and sale price into consideration and finally computes the farm's economic profit. Since most numeric optimizers by default operate as a minimizer, \code{Profit()} returns the negative profit, i.e. a negative number for positive actual profit values and a positive number if cost is greater than revenue (negative actual profit).\\
+\code{Profit()} calls \code{Cost()}, which by default is a stub function only returning the \code{$UnitCost} value from the \code{FarmVars} object. For more sophisticated cost components, users should replace the \code{Cost()} by their own cost model, and \code{Profit()} will operate on it immediately. Similarly, \code{Yield()} is a stub looking up the adjusted AEP based on a given turbine location. If yield or revenue should follow a more sophisticated model, replacing \code{Yield()} by that model would be the way to go. \code{Profit()} will use it accordingly. Note, however, that if the new yield model also takes care of sale prices (or takes non-constant sale prices into account), \code{e$FarmVars$UnitCost} should be ``disabled'' by setting it to a value of one.\\
+\code{PlotResult()} is a convenience function that takes an optimizer result, i.e. an object as returned by \code{optim()}, visualizes the adjusted yield ``landscape'' in the current wind farm setting, superimposes a contour plot and a vector field representing the wind directions and then draws the provided points (turbines). For example, a usual optimization run can be performed in the first place via
 
 <<Result>>=
 library(wflo)
 NumTurbines <- 4
-set.seed(1357)
+set.seed(2763)
 Result <- optim(par = runif(NumTurbines * 2), fn = Profit,
   method = "L-BFGS-B", lower = rep(0, NumTurbines * 2),
   upper = rep(1, NumTurbines * 2))
 Result
 @
 
-Afterward, a call to \code{PlotResult(Result)} will produce the image in Figure \ref{graph:PlotResult}. Lighter shades of blue indicate larger values of AEP, darker ones indicate low AEP values. The actual AEP values are also indicated via the contour lines. The area selected represents a rather complex AEP ``terrain'', a challenging task to optimizers. The light arrows indicate the main wind directions, while the grey arrows add/subtract half the standard deviation to/from the main direction to indicate the direction volatility. The gold dots, finally, show the turbines' arrangement.\\
-Another ``post-optimization'' result inspection functionality is provided by \code{ShowWakePenalizers()}. A call to \code{ShowWakePenalizers(Result)}, where again \code{Result} is the optimizer's output (list object containing at least a ``\code{$par}'' slot), draws a reduced field (neglecting terrain and contour, yet imposing wind directions) and in gold, draws all points (turbines) that are in the wake of other turbines (called ``sufferers'' in the plot's legend) while in grey, all points are drawn causing wake effects on other points (called ``causers''). The Jensen cones imposed on the sufferers are drawn in red. This way, it can be easily inspected whether the optimizer puts emphasis on avoiding wake effects or, vice versa, whether an optimizer finds an optimal arrangement \textit{although} it means that some points cause wake effects on others.
+Afterward, a call to \code{PlotResult(Result)} will produce the image in Figure \ref{graph:PlotResult}. Lighter shades of blue indicate larger values of AEP, darker ones indicate low AEP values. The actual AEP values are also indicated via the contour lines. The area selected represents a rather complex AEP ``terrain'', a challenging task to optimizers. The light arrows indicate the main wind directions, while the grey arrows add/subtract half the standard deviation to/from the main direction to indicate the direction volatility. The gold dots, finally, show the turbines' arrangement. Figure \ref{graph:Big_setup} shows the alternative testing ground presented in Section \ref{subsection:Data Description}, together with a (not necessarily optimal) solution of 20 turbines (gold dots).\\
+Another ``post-optimization'' result inspection functionality is provided by \code{ShowWakePenalizers()}. A call to \code{ShowWakePenalizers(Result)}, where again \code{Result} is the optimizer's output (list object containing at least a ``\code{$par}'' slot), draws a reduced field (neglecting terrain and contour, yet imposing wind directions) and in gold, draws all points (turbines) that are in the wake of other turbines (called ``sufferers'' in the plot's legend) while in grey, all points are drawn causing wake effects on other points (called ``causers''). The Jensen cones imposed on the sufferers are drawn in red. Figure \ref{graph:ShowWake} shows an example. Using \code{ShowWakePenalizers()}, it can be easily inspected whether the optimizer puts emphasis on avoiding wake effects or, vice versa, whether an optimizer finds an optimal arrangement \textit{although} it means that some points cause wake effects on others.\\
+Function \code{ProfitContributors()} computes the profit contribution of each point/turbine as a part of an optimization result. That way, the setup location and wake influence of each point can be analyzed in greater detail. Calling \code{ProfitContributors(Result)} returns a matrix with two columns and as many rows as points present in the provided list object. The first column represents turbine IDs, the second column contains the respective profit contributions of each point. If the solution provided is valid in terms of the minimum distance criterion, the sum of values in the second column will be identical to the (absolute value of) the returned value of \code{Profit()}.
 
 \begin{figure}[t!]
   \centering
@@ -133,18 +146,54 @@ Another ``post-optimization'' result inspection functionality is provided by \co
 
 \begin{figure}[t!]
 \centering
+<<Slots, echo = FALSE, fig = TRUE, height = 12, width = 7>>=
+Oldpar <- par(no.readonly = TRUE)
+
+par(mfrow = c(4, 2), mar = c(0, 0, 0, 0), mai = c(0.2, 0.2, 0.2, 0.2))
+
+MyNames <- c("AEP", "Wind speed", "Wind direction", "SD of wind direction", "Elevation", "Slope", "Hillside")
+
+for (i in 1:7)
+{
+	X <- FarmData[[i]][1:25, 1:25]
+	image(X, main = MyNames[i], xaxt = "n", yaxt = "n", bty = "n", col = rgb(0, 0, seq(from = 0, to = 1, length.out = e$FarmVars$Width * e$FarmVars$Width)))
+}
+
+par(Oldpar)
+@
+\caption{Image plots for the seven slots in \code{FarmData}. Lighter shades of blue indicate larger values, darker ones indicate low values.}
+\label{graph:Slots}
+\end{figure}
+
+\begin{figure}[t!]
+\centering
 <<PlotResult, echo = FALSE, fig = TRUE>>=
 PlotResult(Result)
 @
-\caption{\code{PlotResult} showing the benchmark area.}
+\caption{\code{PlotResult()} showing the benchmark area, four turbines, \code{L-BFGS-B} optimizer.}
 \label{graph:PlotResult}
+\end{figure}
+
+\begin{figure}[t!]
+  \centering
+  \includegraphics[width=13cm]{Big_setup}\\
+  \caption{Alternative testing ground, together with a first solution.}
+  \label{graph:Big_setup}
+\end{figure}
+
+\begin{figure}[t!]
+\centering
+<<ShowWake, echo = FALSE, fig = TRUE>>=
+ShowWakePenalizers(Result)
+@
+\caption{\code{ShowWakePenalizers()} showing the wake structure in the benchmark area, four turbines, \code{L-BFGS-B} optimizer.}
+\label{graph:ShowWake}
 \end{figure}
 
 \section{Use Cases}\label{section:Use Cases}
 
-It is the foremost intention of \pkg{wflo} to be compatible to the \proglang{R} optimization quasi-standard, i.e. optimizers are minimizers, they expect start values and the function to optimize as their parameters and that function is to be provided with nothing but a vector object of values. The optimizer returns a list which contains at least \code{$par} and \code{$value}. With \pkg{wflo}, researchers in WFLO can focus on developing and providing a standard-compliant optimizer and use it to measure its performance on the wind farm setting provided by the package.\\
-In \proglang{R}, most optimizers observe the quasi-standard described above. The only additional requirement for \pkg{wflo} is that the optimizer respects box constraints. However, for optimizers that do not, a crude wrapper is presented below.\\
-As a first use case, package \pkg{nloptr} by \cite{NLopt} provides a controlled random search optimizer. It can be utilized like this:
+It is the foremost intention of \pkg{wflo} to be compatible to the \proglang{R} optimization quasi-standard, i.e. optimizers are minimizers, they expect start values and the function to optimize as their parameters and that function is to be provided with nothing but a vector object of values. The optimizer returns a list which contains at least \code{$par} and \code{$value}. With \pkg{wflo}, researchers in WFLO can focus on developing and providing a standard-compliant optimizer and use it to measure its performance on the wind farm setting provided by the package. An actual \pkg{wflo} workflow of course implies that the user utilizes a self-developed plug-in optimization function. Since none is available here, we merely show a set of sample workflows based on pre-existing optimizers. As can be seen, a  \pkg{wflo} use case is as simple as just minimizing \code{Profit()} using an optimizer. Post-optimization analysis can be performed using \code{PlotResult()}, \code{ShowWakePenalizers()}, and all arbitrary analysis procedures for optimizers.\\
+In \proglang{R}, most optimizers observe the quasi-standard described above. The only additional requirement for \pkg{wflo} is that the optimizer respects box constraints. However, for optimizers that do not, a crude wrapper is presented below. As a first use case, package \pkg{nloptr} by \cite{NLopt} provides a controlled random search optimizer. It can be utilized like this:
 
 <<CRS>>=
 library(nloptr)
@@ -154,7 +203,7 @@ Result <- crs2lm(x0 = runif(NumTurbines * 2), fn = Profit,
 Result
 @
 
-Many WFLO researchers use genetic algorithms to optimize their wind farms. In \proglang{R}, a sophisticated GA implementation is provided via \pkg{rgenoud} by \cite{Mebane2011}:
+Many WFLO researchers use genetic algorithms to optimize their wind farms. In \proglang{R}, a sophisticated GA implementation is provided via package \pkg{rgenoud}:
 
 <<GA>>=
 library(rgenoud)
@@ -201,8 +250,29 @@ Result
 @
 
 Returning the sum of \code{$UnitCost} if any point violates the constraints may seem crude. More sophisticated ways to deal with that are up to the researcher. For now, this simple wrapper gets the job done.\\
-The \code{value}s returned by the optimizers can be interpreted as negative profits in currency (Euros) immediately. As, e.g., \pkg{pso} returns a good result of \code{-2445920} (setup shown in Figure \ref{graph:PSO-Fig}), the setup found by this optimizer generates 2.4 mio. Euros of profit per year. The setup found via SANN generates 2.3 mio. Euros, the simple L-BFGS-B approach only 1.9 mio. Euros. The bottom line here is that it is the number of \code{$value} at which optimizers should really compete.\\
-As a final note we would like to emphasize that increasing \code{NumTurbines} to a more reasonable number increases feature space dimension, and with it, the necessity for increased iterations, population sizes, generations or whatever tuning parameter necessary for the optimizer to more profoundly explore the problem space. Gradient-based optimizers might come in handy, then.
+The \code{value}s returned by the optimizers can be interpreted as negative profits in currency (Euros) immediately. As, e.g., \pkg{pso} returns a good result of \code{-2445920} (setup shown in Figure \ref{graph:PSO-Fig}), the setup found by this optimizer generates 2.4 mio. Euros of profit per year. The setup found via SANN generates 2.3 mio. Euros, a simple L-BFGS-B approach only 2.1 mio. Euros. Optimizers should compete in terms of the returned \code{value}s, higher (absolute) profits are better.\\
+Using function \code{ProfitContributors()}, the influence of each turbine on the total profit can be analyzed using the following code chunk, while using the second column values as labels for \code{PlotResult()} results in Figure \ref{graph:TurbsContribs}:
+
+<<Contribs, fig = FALSE>>=
+NumTurbines <- 4
+set.seed(1235)
+Result <- optim(par = runif(NumTurbines * 2), fn = Profit,
+  method = "L-BFGS-B", lower = rep(0, NumTurbines * 2),
+  upper = rep(1, NumTurbines * 2))
+Contribs <- ProfitContributors(Result)
+Contribs
+PlotResult(Result, DoLabels = TRUE, Labels = Contribs[, 2])
+@
+
+We emphasize that increasing the number of turbines to a more reasonable number increases feature space dimension, and with it, the necessity for increased iterations, population sizes, generations, or whatever tuning parameter necessary for the optimizer to more profoundly explore the problem space. Gradient-based optimizers might come in handy, then. So far, for a 20 turbines setting, \code{e$FarmVars$BenchmarkSolution} provides an orientation (the plots are shows in Figures \ref{graph:20TurbsPlot} and \ref{graph:20TurbsWake}, respectively):
+
+<<TurbsOutput, fig = FALSE>>=
+Result <- list(par = e$FarmVars$BenchmarkSolution)
+Result$value <- Profit(Result$par)
+Result
+PlotResult(Result)
+ShowWakePenalizers(Result)
+@
 
 \begin{figure}[t!]
 \centering
@@ -212,13 +282,48 @@ Result <- psoptim(par = runif(NumTurbines * 2), fn = Profit,
   lower = rep(0, NumTurbines * 2), upper = rep(1, NumTurbines * 2))
 PlotResult(Result)
 @
-\caption{\code{PlotResult} showing the pso result.}
+\caption{\code{PlotResult()} showing the \code{pso} optimizer result, four turbines.}
 \label{graph:PSO-Fig}
+\end{figure}
+
+\begin{figure}[t!]
+\centering
+<<TurbsContribs, echo = FALSE, fig = TRUE>>=
+NumTurbines <- 4
+set.seed(1235)
+Result <- optim(par = runif(NumTurbines * 2), fn = Profit,
+  method = "L-BFGS-B", lower = rep(0, NumTurbines * 2),
+  upper = rep(1, NumTurbines * 2))
+MyLabels <- ProfitContributors(Result)
+PlotResult(Result, DoLabels = TRUE, Labels = MyLabels[, 2])
+@
+\caption{\code{PlotResult()} showing an \code{L-BFGS-B} result (four turbines), imposing the values returned by \code{ProfitContributors()} as labels.}
+\label{graph:TurbsContribs}
+\end{figure}
+
+\begin{figure}[t!]
+\centering
+<<TurbsPlot, echo = FALSE, fig = TRUE>>=
+Result <- list(par = e$FarmVars$BenchmarkSolution)
+PlotResult(Result)
+@
+\caption{\code{PlotResult()} showing the 20 turbines benchmark setup result.}
+\label{graph:20TurbsPlot}
+\end{figure}
+
+\begin{figure}[t!]
+\centering
+<<TurbsWake, echo = FALSE, fig = TRUE>>=
+Result <- list(par = e$FarmVars$BenchmarkSolution)
+ShowWakePenalizers(Result)
+@
+\caption{\code{ShowWakePenalizers()} showing the 20 turbines benchmark wake structure result.}
+\label{graph:20TurbsWake}
 \end{figure}
 
 \section{Conclusion}\label{section:Conclusion}
 
-\pkg{wflo} is an approach to provide a level playing field for researchers in WFLO: It provides the necessary data at high quality, a useful set of functions that takes the necessity to implement a wake model and a specific problem function away from the researcher, enabling her/him to entirely focus on the actual job, which is the optimizer itself. Furthermore, a unified benchmark is provided. \code{NumTurbines} = 4 is too little for a serious benchmark. Things become really interesting if, say, 20 turbines are to be placed. Every WFLO researcher should try her/his approach with \pkg{wflo} to get to see how competitive the contributed approach really is.
+\pkg{wflo} is an approach to provide a level playing field for researchers in WFLO: It makes the necessary data available at high quality and contains a useful set of functions that takes the necessity to implement a wake model and a specific problem function away from the researcher, enabling her/him to entirely focus on the actual job, which is the optimizer itself. Furthermore, a unified benchmark is provided. A number of turbines to place of around four is a good start to obtain first experience with \pkg{wflo}. Things become however really interesting if, say, 20 turbines are to be placed. Every WFLO researcher is invited to try her/his approach with \pkg{wflo} to get to see how competitive the contributed approach really is.
 
 \clearpage
 

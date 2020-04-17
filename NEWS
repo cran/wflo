@@ -1,0 +1,27 @@
+wflo 1.4
+========
+
+Changes:
+
+* Minor bugfixes.
+* Added CITATION file.
+* Added benchmark solution for 20 turbines setup.
+* Several updates to the vignette.
+* Updates to function PlotProfit().
+* Added function ProfitContributors().
+
+
+wflo 1.3
+========
+
+Changes:
+
+* Added function ShowWakePenalizers().
+* Added elevation, slope and slope direction to data set.
+* Minor bugfixes.
+
+
+wflo 1.2
+========
+
+* Initial release
