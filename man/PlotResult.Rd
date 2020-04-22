@@ -8,12 +8,15 @@ This function draws the adjusted yields of the wind farm under investigation usi
 }
 
 \usage{
-PlotResult(Result, DoLabels = FALSE, Labels = "IDs")
+PlotResult(Result, ImageData = NULL, DoLabels = FALSE, Labels = "IDs")
 }
 
 \arguments{
 	\item{Result}{
 		must be an optimization result as returned by an optimizer such as \code{\link{optim}}. Usually, this will be a \code{list} at least containing '$par'. Most optimizers comply with this R standard. If your optimizer does not, wrap its result into a list containing an object '$par' containing the optimization result (i.e., a vector of points).
+	}
+	\item{ImageData}{
+		a matrix containing the data for the background, processed via \code{\link{image}}. If not provided (or NULL), uses the data in \code{FarmData[[1]]} or, if present, \code{e$FarmData[[1]]}. Defaults to NULL.
 	}
 \item{DoLabels}{
 		a boolean that indicates whether labels should be plotted next to the points. Defaults to FALSE.

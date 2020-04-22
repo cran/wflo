@@ -38,8 +38,28 @@ Carsten Croonenbroeck
 }
 
 \examples{
-Cost(c(0.5, 0.7), c(0.2, 0.3))
 ## Returns a vector of two, c(100000, 100000).
+Cost(c(0.5, 0.7), c(0.2, 0.3))
+
+## Replace the function by another function
+## also called 'Cost', embedded in environment e.
+## Also, see the vignette.
+\donttest{
+if(requireNamespace("pso")){
+library(pso)
+e$Cost <- function(x, y) #x, y \in R^n
+{
+	retVal <- rep(e$FarmVars$UnitCost, min(length(x), length(y)))
+	retVal[x > 0.5] <- retVal[x > 0.5] * 2
+	return(retVal)
+}
+set.seed(1357)
+Result <- psoptim(par = runif(NumTurbines * 2), fn = Profit,
+  lower = rep(0, NumTurbines * 2), upper = rep(1, NumTurbines * 2))
+Result
+rm(Cost, envir = e)
+}
+}
 }
 
 \keyword{Cost}

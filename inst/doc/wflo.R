@@ -117,7 +117,73 @@ Result
 
 
 ###################################################
-### code chunk number 11: Contribs
+### code chunk number 11: Cost
+###################################################
+e$Cost <- function(x, y) #x, y \in R^n
+{
+	retVal <- rep(e$FarmVars$UnitCost, min(length(x), length(y)))
+	retVal[x > 0.5] <- retVal[x > 0.5] * 2
+	return(retVal)
+}
+
+
+###################################################
+### code chunk number 12: CostOptim
+###################################################
+set.seed(1357)
+Result <- psoptim(par = runif(NumTurbines * 2), fn = Profit,
+  lower = rep(0, NumTurbines * 2), upper = rep(1, NumTurbines * 2))
+Result
+rm(Cost, envir = e)
+
+
+###################################################
+### code chunk number 13: Cost2
+###################################################
+e$Cost <- function(x, y)
+{
+	n <- min(length(x), length(y))
+
+	retVal <- rep(e$FarmVars$UnitCost, n)
+
+	DistMat <- matrix(ncol = n, nrow = n)
+	for (i in 1:n)
+	{
+		for (j in 1:n)
+		{
+			DistMat[i, j] <- sqrt((x[i] - x[j]) ^ 2 + (y[i] - y[j]) ^ 2)
+		}
+	}
+	SumDist <- as.numeric()
+	for (i in 1:n) SumDist[i] <- sum(DistMat[i, ])
+
+	retVal <- retVal * SumDist
+	return(retVal)
+}
+rm(Cost, envir = e)
+
+
+###################################################
+### code chunk number 14: Yield
+###################################################
+e$Yield <- function(x, y, AEP) #x, y \in R
+{
+	return(x + y)
+}
+
+
+###################################################
+### code chunk number 15: YieldOptim
+###################################################
+set.seed(1357)
+Result <- psoptim(par = runif(NumTurbines * 2), fn = Profit,
+  lower = rep(0, NumTurbines * 2), upper = rep(1, NumTurbines * 2))
+Result
+rm(Yield, envir = e)
+
+
+###################################################
+### code chunk number 16: Contribs
 ###################################################
 NumTurbines <- 4
 set.seed(1235)
@@ -130,7 +196,7 @@ PlotResult(Result, DoLabels = TRUE, Labels = Contribs[, 2])
 
 
 ###################################################
-### code chunk number 12: TurbsOutput
+### code chunk number 17: TurbsOutput
 ###################################################
 Result <- list(par = e$FarmVars$BenchmarkSolution)
 Result$value <- Profit(Result$par)
@@ -140,7 +206,7 @@ ShowWakePenalizers(Result)
 
 
 ###################################################
-### code chunk number 13: PSO-Fig
+### code chunk number 18: PSO-Fig
 ###################################################
 set.seed(1357)
 Result <- psoptim(par = runif(NumTurbines * 2), fn = Profit,
@@ -149,7 +215,7 @@ PlotResult(Result)
 
 
 ###################################################
-### code chunk number 14: TurbsContribs
+### code chunk number 19: TurbsContribs
 ###################################################
 NumTurbines <- 4
 set.seed(1235)
@@ -161,14 +227,14 @@ PlotResult(Result, DoLabels = TRUE, Labels = MyLabels[, 2])
 
 
 ###################################################
-### code chunk number 15: TurbsPlot
+### code chunk number 20: TurbsPlot
 ###################################################
 Result <- list(par = e$FarmVars$BenchmarkSolution)
 PlotResult(Result)
 
 
 ###################################################
-### code chunk number 16: TurbsWake
+### code chunk number 21: TurbsWake
 ###################################################
 Result <- list(par = e$FarmVars$BenchmarkSolution)
 ShowWakePenalizers(Result)

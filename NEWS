@@ -1,3 +1,13 @@
+wflo 1.5
+========
+
+Changes:
+
+* Updated benchmark solution.
+* Improved Cost() and Yield() functions' plug-in capabilities.
+* Updated vignette accordingly.
+
+
 wflo 1.4
 ========
 

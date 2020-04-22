@@ -40,11 +40,30 @@ Carsten Croonenbroeck
 }
 
 \examples{
+## Returns adjusted yield for the given location.
 Adj <- FarmData[[1]][e$FarmVars$StartPoint:e$FarmVars$EndPoint,
 e$FarmVars$StartPoint:e$FarmVars$EndPoint]
 Yield(0.5, 0.7, Adj)
-## Returns adjusted yield for the given location.
+
+## Replace the function by another function
+## also called 'Yield', embedded in environment e.
+## Also, see the vignette.
+\donttest{
+if(requireNamespace("pso")){
+library(pso)
+e$Yield <- function(x, y, AEP) #x, y \in R
+{
+	return(x + y)
 }
+set.seed(1357)
+Result <- psoptim(par = runif(NumTurbines * 2), fn = Profit,
+  lower = rep(0, NumTurbines * 2), upper = rep(1, NumTurbines * 2))
+Result
+rm(Yield, envir = e)
+}
+}
+}
+
 
 \keyword{Yield}
 \keyword{Profit}

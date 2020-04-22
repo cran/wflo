@@ -250,11 +250,24 @@ Profit <- function(X)
 	}
 
 	PointYield <- as.numeric()
-	for (i in 1:n) PointYield[i] <- Yield(x[i], y[i], Adj)
 
-	Revenue <- (PointYield * e$FarmVars$Price) * p
+	if (exists("Yield", envir = e, inherits = FALSE))
+	{
+	  for (i in 1:n) PointYield[i] <- e$Yield(x[i], y[i], Adj) * p[i]
+	  Revenue <- PointYield
+	} else
+	{
+	  for (i in 1:n) PointYield[i] <- Yield(x[i], y[i], Adj) * p[i]
+	  Revenue <- (PointYield * e$FarmVars$Price)
+	}
 
-	retVal <- sum(Revenue - Cost(x, y))
+	if (exists("Cost", envir = e, inherits = FALSE))
+	{
+	  retVal <- sum(Revenue - e$Cost(x, y))
+	} else
+	{
+	  retVal <- sum(Revenue - Cost(x, y))
+	}
 
 	return(-retVal) #Make it a minimization problem.
 }
@@ -375,25 +388,46 @@ ProfitContributors <- function(Result)
   }
 
   PointYield <- as.numeric()
-  for (i in 1:n) PointYield[i] <- Yield(x[i], y[i], Adj)
 
-  Revenue <- (PointYield * e$FarmVars$Price) * p
-  retVal <- Revenue - Cost(x, y)
-  retVal <- cbind(1:length(x), retVal)
+  if (exists("Yield", envir = e, inherits = FALSE))
+  {
+    for (i in 1:n) PointYield[i] <- e$Yield(x[i], y[i], Adj) * p[i]
+    Revenue <- PointYield
+  } else
+  {
+    for (i in 1:n) PointYield[i] <- Yield(x[i], y[i], Adj) * p[i]
+    Revenue <- (PointYield * e$FarmVars$Price)
+  }
+
+  if (exists("Cost", envir = e, inherits = FALSE))
+  {
+    retVal <- Revenue - e$Cost(x, y)
+  } else
+  {
+    retVal <- Revenue - Cost(x, y)
+  }
+
+  retVal <- cbind(1:n, retVal)
   colnames(retVal) <- c("Turbine", "Profit")
   return(retVal)
 }
 
-PlotResult <- function(Result, DoLabels = FALSE, Labels = "IDs")
+PlotResult <- function(Result, ImageData = NULL, DoLabels = FALSE, Labels = "IDs")
 {
   if (!any(names(Result) == "par")) stop("Not a valid optimizer result provided.")
 
-  if (exists("FarmData", envir = e, inherits = FALSE))
+  if (is.null(ImageData))
   {
-	  Adj <- e$FarmData[[1]][e$FarmVars$StartPoint:e$FarmVars$EndPoint, e$FarmVars$StartPoint:e$FarmVars$EndPoint]
+    if (exists("FarmData", envir = e, inherits = FALSE))
+    {
+  	  Adj <- e$FarmData[[1]][e$FarmVars$StartPoint:e$FarmVars$EndPoint, e$FarmVars$StartPoint:e$FarmVars$EndPoint]
+    } else
+    {
+      Adj <- FarmData[[1]][e$FarmVars$StartPoint:e$FarmVars$EndPoint, e$FarmVars$StartPoint:e$FarmVars$EndPoint]
+    }
   } else
   {
-    Adj <- FarmData[[1]][e$FarmVars$StartPoint:e$FarmVars$EndPoint, e$FarmVars$StartPoint:e$FarmVars$EndPoint]
+    Adj <- ImageData
   }
 
 	Z <- matrix(ncol = e$FarmVars$Width, nrow = e$FarmVars$Width)
