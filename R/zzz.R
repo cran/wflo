@@ -12,6 +12,7 @@ FarmVars$MinDist <- e$FarmVars$MeterMinDist / e$FarmVars$MeterWidth
 FarmVars$z <- 100
 FarmVars$z0 <- 0.1
 FarmVars$r0 <- 45
+FarmVars$Partial <- TRUE
 FarmVars$Bench <-
   c(0.66681197, 0.51920366, 0.40001173, 0.73883743, 0.39199855,
     0.29543266, 0.83333332, 0.36453646, 0.84200820, 0.17836044,
@@ -24,7 +25,9 @@ FarmVars$Bench <-
 
 .onAttach <- function(libname, pkgname)
 {
+  options("rgdal_show_exportToProj4_warnings" = "none")
   Ver <- as.character(packageVersion("wflo")[1])
+
   packageStartupMessage(paste("This is wflo, version ", Ver, ". Looking for full data file...", sep = ""))
 
 	if (file.exists("FarmData.RData"))
@@ -49,6 +52,7 @@ FarmVars$Bench <-
 			e$FarmVars$z <- 100
 			e$FarmVars$z0 <- 0.1
 			e$FarmVars$r0 <- 45
+			e$FarmVars$Partial <- TRUE
 			e$FarmVars$BenchmarkSolution <- FarmVars$Bench
 
 			packageStartupMessage("Success. Operating in full mode now.")
@@ -66,6 +70,7 @@ FarmVars$Bench <-
 		  e$FarmVars$z <- 100
 		  e$FarmVars$z0 <- 0.1
 		  e$FarmVars$r0 <- 45
+		  e$FarmVars$Partial <- TRUE
 		  e$FarmVars$BenchmarkSolution <- FarmVars$Bench
 
 			packageStartupMessage("File found, but seems to be corrupt. Operating in basic mode.")
@@ -84,6 +89,7 @@ FarmVars$Bench <-
 	  e$FarmVars$z <- 100
 	  e$FarmVars$z0 <- 0.1
 	  e$FarmVars$r0 <- 45
+	  e$FarmVars$Partial <- TRUE
 	  e$FarmVars$BenchmarkSolution <- FarmVars$Bench
 
 		packageStartupMessage("File not found, operating in basic mode.")

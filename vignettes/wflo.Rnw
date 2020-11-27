@@ -69,7 +69,7 @@ Approaches to solving this problem can not only be classified a) according to th
 Most optimizers employ gradient-free methods, as these methods (e.g. metaheuristic algorithms such as genetic algorithms (GA) or simulated annealing) perform fairly well at exploring the feature space, given that this space is not of too high dimension. For example, \cite{Chen2013}, \cite{Park2019}, and \cite{Yang2019} use these methods. Higher-dimensional spaces however are the domain of gradient-based approaches, as \cite{Thomas2018} point out.\\
 Many researchers use wind farm efficiency or annual energy production (AEP) as their target function, e.g. \cite{Park2019}. However, a more realistic approach considers what wind farm operators are really after: Earning money. Therefore, as \cite{Gualtieri2019} points out, AEP maximization is not an immediately meaningful goal. Instead, researchers recently tend to use economically driven target functions. \cite{Wu2020} use a profit-driven function, which also enables them to flexibly incorporate cost or revenue influencing drivers of the optimization problem, e.g. inner-farm wiring. As an alternative, \cite{Yang2019} discuss wake effect uniformity instead of AEP or profit maximization as an alternative target.\\
 \cite{Antonini2020} point out the complex terrain aspects of the WFLO problem, an issue that \cite{Thomas2018} try to relax. However, as this is just a means of modifying the problem at hand to ease its handling, it even emphasizes the necessity for a unified setting and goal in order to focus on the methodology to solve that goal. Thus, researchers even start WFLO competitions to have participants compete on a unified setting. \cite{Baker2019} show the outcome of such a competition. Their competition does not only provide a unified target and unified data, it also serves as a benchmark that every participant can use to evaluate his/her own methodology idea/contribution.\\
-Using \verb"R" by \cite{R}, package \textbf{windfarmGA} provides a genetic algorithm implementation to deal with WFLO. The methodology can be explored at \url{https://windfarmga.shinyapps.io/windga_shiny/} as well. However, as this is an approach at solving the problem, it still does not fully describe the problem itself, nor does it provide a data set or a benchmark. At this point, package \textbf{wflo} (see \url{https://CRAN.R-project.org/package=wflo}) comes into place: It provides high-quality and highly accurate data, which can be used for both, developing a methodology as well as benchmarking it. It does not, however, provide an actual optimization solution. \textbf{wflo} is merely a sandbox for solution researchers. The package also provides a set of modular functions around the WFLO problem, providing an economically driven target function implementing Jensen's multiple wake effects model, plug-in functions for cost and revenue and a set of parameters. In this article, we discuss the components of package \textbf{wflo} and its intended usage in great detail. Section \ref{section:Data and Functions} presents the data and sheds light on the functions and their utility. Section \ref{section:Use Cases} provides usage examples and section \ref{section:Conclusion} draws a brief conclusion.
+Using \verb"R" by \cite{R}, package \textbf{windfarmGA} provides a genetic algorithm implementation to deal with WFLO. The methodology can be explored at \url{https://windfarmga.shinyapps.io/windga_shiny/} as well. However, as this is an approach at solving the problem, it still does not fully describe the problem itself, nor does it provide a data set or a benchmark. At this point, package \textbf{wflo} (see \url{https://CRAN.R-project.org/package=wflo}) comes into place: It provides high-quality and highly accurate data, which can be used for both, developing a methodology as well as benchmarking it. It does not, however, provide an actual optimization solution. \textbf{wflo} is merely a sandbox for solution researchers. The package also provides a set of modular functions around the WFLO problem, providing an economically driven target function implementing Jensen's multiple and partial wake effects model, plug-in functions for cost and revenue and a set of parameters. In this article, we discuss the components of package \textbf{wflo} and its intended usage in great detail. Section \ref{section:Data and Functions} presents the data and sheds light on the functions and their utility. Section \ref{section:Use Cases} provides usage examples and section \ref{section:Conclusion} draws a brief conclusion.
 
 \section{Data and Functions}\label{section:Data and Functions}
 
@@ -97,7 +97,7 @@ which results in \verb"e$FarmVars$EndPoint" = 2024 in full mode and \verb"e$Farm
   \footnotesize\verb"e$FarmVars$MinDist <- e$FarmVars$MeterMinDist / e$FarmVars$MeterWidth",
 \end{equation}
 
-which consequently defaults to 500 / 5000 = 0.1, i.e. one tenth of the farm square's height or width. \verb"e$FarmVars" also contains variables \verb"$z", \verb"$z0", and \verb"$r0", which contain the turbines' hub height in meters (defaults to \verb"e$FarmVars$z" = 100), the terrain's roughness length required for Jensen's wake model (defaults to \verb"e$FarmVars$z0" = 0.1), and the turbines' rotor radius in meters (defaults to \verb"e$FarmVars$r0" = 45). Users should adjust these values according to their turbine specifications or use the default values for benchmarking. Furthermore, \verb"e$FarmVars" contains the variables \verb"$UnitCost" and \verb"$Price". \verb"$UnitCost" is meant to carry a single turbine's yearly cost. If, for example, total turbine installation costs are 2 mio. EUR and the projected life span of the turbine is 20 years, then the yearly cost is roughly 100,000 EUR, which is also the default value for this item. Additional cost components such as wiring, (non-linear) amortization, maintenance, opportunity cost, or others can be modeled using an alternative cost function which can be plugged in easily (see below). Similarly, \verb"$Price" contains the sale price per megawatt hour. This defaults to an empirically reasonable average of 100 EUR. However, if revenue is to be modeled in a more sophisticated fashion than using ``constant price times sale volume'', the necessary adjustments are easily performed (once again, see below). Finally, \verb"e$FarmVars" contains a vector object \verb"$BenchmarkSolution", which holds 40 values (20 pairs of x and y coordinates) representing a setup of 20 turbines within the standard data set terrain. It has been obtained using optimizer \verb"genoud()" of package \textbf{rgenoud} by \cite{Mebane2011} and provides a standard of comparison for future optimizers or can be used as starting points for further exploring the feature space.\\
+which consequently defaults to 500 / 5000 = 0.1, i.e. one tenth of the farm square's height or width. \verb"e$FarmVars" also contains variables \verb"$z", \verb"$z0", and \verb"$r0", which contain the turbines' hub height in meters (defaults to \verb"e$FarmVars$z" = 100), the terrain's roughness length required for Jensen's wake model (defaults to \verb"e$FarmVars$z0" = 0.1), and the turbines' rotor radius in meters (defaults to \verb"e$FarmVars$r0" = 45). Users should adjust these values according to their turbine specifications or use the default values for benchmarking. Variable \verb"e$FarmVars$Partial" is a boolean which controls whether \verb"Profit()" will compute the partial Jensen wake model (see below). Furthermore, \verb"e$FarmVars" contains the variables \verb"$UnitCost" and \verb"$Price". \verb"$UnitCost" is meant to carry a single turbine's yearly cost. If, for example, total turbine installation costs are 2 mio. EUR and the projected life span of the turbine is 20 years, then the yearly cost is roughly 100,000 EUR, which is also the default value for this item. Additional cost components such as wiring, (non-linear) amortization, maintenance, opportunity cost, or others can be modeled using an alternative cost function which can be plugged in easily (see below). Similarly, \verb"$Price" contains the sale price per megawatt hour. This defaults to an empirically reasonable average of 100 EUR. However, if revenue is to be modeled in a more sophisticated fashion than using ``constant price times sale volume'', the necessary adjustments are easily performed (once again, see below). Finally, \verb"e$FarmVars" contains a vector object \verb"$BenchmarkSolution", which holds 40 values (20 pairs of x and y coordinates) representing a setup of 20 turbines within the standard data set terrain. It has been obtained using optimizer \verb"genoud()" of package \textbf{rgenoud} by \cite{Mebane2011} and provides a standard of comparison for future optimizers or can be used as starting points for further exploring the feature space.\\
 Changing, say, \verb"$r0" or \verb"$z", but more immediately, \verb"$StartPoint" and \verb"$EndPoint", turns the problem into an entirely new setup. For instance, assuming the full data set is present, selecting
 
 <<Newfield, eval = FALSE>>=
@@ -112,7 +112,7 @@ provides an entirely new (and larger) testing ground. A huge multitude of optimi
 
 \subsection{Functions}\label{subsection:Functions}
 
-The central function to \textbf{wflo} is \verb"Profit()". It takes a set of points in the unit square (turbine locations) and based on the adjusted AEP in the farm specified via the \verb"e$FarmVars" settings object, checks whether the layout is valid (i.e. minimum distances are met for all turbines), computes multiple Jensen wake penalties, generates the total marketable power production of the specified layout, takes cost and sale price into consideration and finally computes the farm's economic profit. Since most numeric optimizers by default operate as a minimizer, \verb"Profit()" returns the negative profit, i.e. a negative number for positive actual profit values and a positive number if cost is greater than revenue (negative actual profit).\\
+The central function to \textbf{wflo} is \verb"Profit()". It takes a set of points in the unit square (turbine locations) and based on the adjusted AEP in the farm specified via the \verb"e$FarmVars" settings object, checks whether the layout is valid (i.e. minimum distances are met for all turbines), computes multiple Jensen wake penalties (and, by default, also the partial wake penalty as originally described by \citealp{Frandsen1992} and, more recently, by \citealp{Abdulrahman2017}, taking only partial wake cones coverage of rotor discs into account), generates the total marketable power production of the specified layout, takes cost and sale price into consideration and finally computes the farm's economic profit. Since most numeric optimizers by default operate as a minimizer, \verb"Profit()" returns the negative profit, i.e. a negative number for positive actual profit values and a positive number if cost is greater than revenue (negative actual profit).\\
 \verb"Profit()" calls \verb"Cost()", which is a stub function only returning the \verb"$UnitCost" value from the \verb"FarmVars" object. For more sophisticated cost components, users should replace the \verb"Cost()" function by their own cost model. This can be done by embedding another function \verb"Cost()" in the \verb"e" environment. \verb"Profit()" will then operate on it immediately. Note that \verb"Cost()" must be a function that is provided with \verb"x" and \verb"y" (the turbine coordinates in the unit square) and both, \verb"x" and \verb"y", must be $\in \mathbb{R}^n$, i.e. both variables are vectors of length \verb"n" (the number of turbines). An example for such a workflow is given in Section \ref{section:Use Cases}. Similarly, \verb"Yield()" is a stub looking up the adjusted AEP based on a given turbine location. If yield or revenue should follow a more sophisticated model, replacing \verb"Yield()" by that model would be the way to go. Again, a plug-in yield function must be embedded in \verb"e", and \verb"Profit()" will use it accordingly. In contrast to \verb"Cost()", \verb"Yield()" must be a function provided with \verb"x", \verb"y", and \verb"AEP". Here, \verb"x" and \verb"y" must be $\in \mathbb{R}$, i.e. single-valued variables for one turbine at a time. \verb"AEP" will carry the AEP values for the wind farm. The user function is not required to evaluate this, the object is just provided for convenience. Note, however, that according to the calling convention, the function must have a prototype declaration that expects that object.\\
 \verb"PlotResult()" is a convenience function that takes an optimizer result, i.e. an object as returned by \verb"optim()", visualizes the adjusted yield ``landscape'' in the current wind farm setting, superimposes a contour plot and a vector field representing the wind directions and then draws the provided points (turbines). For example, a usual optimization run can be performed in the first place via
 
@@ -122,7 +122,7 @@ NumTurbines <- 4
 set.seed(2763)
 Result <- optim(par = runif(NumTurbines * 2), fn = Profit,
   method = "L-BFGS-B", lower = rep(0, NumTurbines * 2),
-  upper = rep(1, NumTurbines * 2))
+  upper = rep(1, NumTurbines * 2), control = list(maxit = 10))
 Result
 @
 
@@ -199,7 +199,8 @@ In \verb"R", most optimizers observe the quasi-standard described above. The onl
 library(nloptr)
 set.seed(1357)
 Result <- crs2lm(x0 = runif(NumTurbines * 2), fn = Profit,
-  lower = rep(0, NumTurbines * 2), upper = rep(1, NumTurbines * 2))
+lower = rep(0, NumTurbines * 2),
+upper = rep(1, NumTurbines * 2), maxeval = 1000)
 Result
 @
 
@@ -211,7 +212,7 @@ set.seed(1357)
 Dom = cbind(rep(0, 2 * NumTurbines), rep(1, 2 * NumTurbines))
 Result <- genoud(fn = Profit, nvars = 2 * NumTurbines,
   starting.values = runif(NumTurbines * 2), Domains = Dom,
-  boundary.enforcement = 2, print.level = 0)
+  boundary.enforcement = 2, print.level = 0, max.generations = 10)
 Result
 @
 
@@ -221,7 +222,8 @@ Finally, particle swarm optimization (PSO) is another metaheuristic frequently u
 library(pso)
 set.seed(1357)
 Result <- psoptim(par = runif(NumTurbines * 2), fn = Profit,
-  lower = rep(0, NumTurbines * 2), upper = rep(1, NumTurbines * 2))
+lower = rep(0, NumTurbines * 2),
+upper = rep(1, NumTurbines * 2), control = list(maxit = 100))
 Result
 @
 
@@ -245,7 +247,7 @@ Wrapper <- function(X)
 }
 set.seed(1357)
 Result <- optim(par = runif(NumTurbines * 2), fn = Wrapper,
-  method = "SANN")
+  method = "SANN", control = list(maxit = 1000))
 Result
 @
 
@@ -266,7 +268,8 @@ embeds a cost function that overly punishes turbine locations on the right (or e
 <<CostOptim>>=
 set.seed(1357)
 Result <- psoptim(par = runif(NumTurbines * 2), fn = Profit,
-  lower = rep(0, NumTurbines * 2), upper = rep(1, NumTurbines * 2))
+lower = rep(0, NumTurbines * 2), upper = rep(1, NumTurbines * 2),
+control = list(maxit = 100))
 Result
 rm(Cost, envir = e)
 @
@@ -311,7 +314,8 @@ is again a crude example. The function does not even evaluate AEP and provides a
 <<YieldOptim>>=
 set.seed(1357)
 Result <- psoptim(par = runif(NumTurbines * 2), fn = Profit,
-  lower = rep(0, NumTurbines * 2), upper = rep(1, NumTurbines * 2))
+lower = rep(0, NumTurbines * 2), upper = rep(1, NumTurbines * 2),
+control = list(maxit = 100))
 Result
 rm(Yield, envir = e)
 @
@@ -325,7 +329,7 @@ NumTurbines <- 4
 set.seed(1235)
 Result <- optim(par = runif(NumTurbines * 2), fn = Profit,
   method = "L-BFGS-B", lower = rep(0, NumTurbines * 2),
-  upper = rep(1, NumTurbines * 2))
+  upper = rep(1, NumTurbines * 2), control = list(maxit = 10))
 Contribs <- ProfitContributors(Result)
 Contribs
 PlotResult(Result, DoLabels = TRUE, Labels = Contribs[, 2])
@@ -346,7 +350,7 @@ ShowWakePenalizers(Result)
 <<PSO-Fig, echo = FALSE, fig = TRUE>>=
 set.seed(1357)
 Result <- psoptim(par = runif(NumTurbines * 2), fn = Profit,
-  lower = rep(0, NumTurbines * 2), upper = rep(1, NumTurbines * 2))
+  lower = rep(0, NumTurbines * 2), upper = rep(1, NumTurbines * 2), control = list(maxit = 100))
 PlotResult(Result)
 @
 \caption{PlotResult() showing the pso optimizer result, four turbines.}
@@ -360,7 +364,7 @@ NumTurbines <- 4
 set.seed(1235)
 Result <- optim(par = runif(NumTurbines * 2), fn = Profit,
   method = "L-BFGS-B", lower = rep(0, NumTurbines * 2),
-  upper = rep(1, NumTurbines * 2))
+  upper = rep(1, NumTurbines * 2), control = list(maxit = 10))
 MyLabels <- ProfitContributors(Result)
 PlotResult(Result, DoLabels = TRUE, Labels = MyLabels[, 2])
 @

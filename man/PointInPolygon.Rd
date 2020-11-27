@@ -4,7 +4,7 @@
 \title{Checks whether a point is inside a polygon.}
 
 \description{
-Used the famous Jensen test to check whether a provided point is inside a polygon, the latter defined by a set of points.
+Uses the famous Jensen test to check whether a provided point is inside a polygon, the latter defined by a set of points.
 }
 
 \usage{
@@ -42,7 +42,7 @@ Angle <- runif(n = 1, min = 0, max = 360)
 Point <- runif(n = 2, min = 0, max = 1)
 Dist <- rnorm(n = 1, mean = 200, sd = 200)
 
-MyTrapezoid = JensenTrapezoid(Angle, Point, Dist)
+MyTrapezoid <- JensenTrapezoid(Angle, Point, Dist)
 
 plot(x = MyTrapezoid[1, ], y = MyTrapezoid[2, ], xlab = "", ylab = "")
 lines(x = c(MyTrapezoid[1, 1], MyTrapezoid[1, 2]), y = c(MyTrapezoid[2, 1], MyTrapezoid[2, 2]))

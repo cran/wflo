@@ -33,7 +33,8 @@ PairPenalty(x1, y1, x2, y2, Dirs, SDs)
 }
 
 \details{
-First, this function uses \code{\link{GetAngle}} to compute the angle between the two points provided, as seen from point 2's point of view. It then obtains the wind direction at point 2 using \code{\link{GetDirInfo}}. After that, the distance between the two points is computed. With it, the wake cone is computed using \code{\link{JensenAngle}} to check whether point 2 is in point 1's wake using \code{\link{JensenTrapezoid}}. If that is the case, \code{\link{JensenFactor}} is used to compute the penalty factor.
+First, this function uses \code{\link{GetAngle}} to compute the angle between the two points provided, as seen from point 2's point of view. It then obtains the wind direction at point 2 using \code{\link{GetDirInfo}}. After that, the distance between the two points is computed. With it, the wake cone is computed using \code{\link{JensenAngle}} to check whether point 2 is in point 1's wake using \code{\link{JensenTrapezoid}}. If that is the case, \code{\link{JensenFactor}} is used to compute the penalty factor.\cr
+Note that the penalty is the deduction to wind speed. It applies to wind power by its third power, so the user is responsible to take it to its cube himself. \code{\link{Profit}} does that automatically internally.
 }
 
 \value{

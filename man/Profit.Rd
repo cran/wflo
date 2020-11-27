@@ -32,7 +32,7 @@ Carsten Croonenbroeck
 }
 
 \seealso{
-Use \code{\link{PlotResult}} to visualize the optimization result.
+Calls \code{\link{Yield}} and \code{\link{Cost}} internally. Use \code{\link{PlotResult}} to visualize the optimization result.
 }
 
 \examples{
@@ -48,13 +48,12 @@ PlotResult(Result)
 #Will provide a somewhat better result
 #Necessary to install pso
 \donttest{
-if(requireNamespace("pso")){
-library(pso)
 NumTurbines <- 4
-Result <- psoptim(par = runif(NumTurbines * 2), fn = Profit,
+Result <- pso::psoptim(par = runif(NumTurbines * 2), fn = Profit,
   lower = rep(0, NumTurbines * 2), upper = rep(1, NumTurbines * 2))
 Result
-PlotResult(Result)}}
+PlotResult(Result)
+}
 ##########################################
 #Simple wrapper function for optimizers not accepting box constraints
 NumTurbines <- 4
@@ -68,7 +67,7 @@ Wrapper <- function(X)
 
 	if (any(x < lower) | any(x > upper) | any(y < lower) | any(y > upper))
 	{
-		return(sum(rep(FarmVars$UnitCost, length(x))))
+		return(sum(rep(e$FarmVars$UnitCost, length(x))))
 	}
 
 	return(Profit(X))

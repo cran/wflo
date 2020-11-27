@@ -32,7 +32,10 @@ FarmData
 
 \source{
 DWD Climate Data Center (CDC): \url{ftp://opendata.dwd.de/climate_environment/CDC/grids_germany/multi_annual/wind_parameters/resol_200x200/}\cr
-FGW Technical Guidelines: \url{https://wind-fgw.de/shop/technical-guidelines/?lang=en}
+\cr
+FGW Technical Guidelines: \url{https://wind-fgw.de/shop/technical-guidelines/?lang=en}\cr
+\cr
+Croonenbroeck, C. & Hennecke, D. Does the German renewable energy act provide a fair incentive system for onshore wind power? - A simulation analysis, Energy Policy, 2020, 114, 111663, 1-15, https://doi.org/10.1016/j.enpol.2020.111663
 }
 
 \author{

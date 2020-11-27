@@ -1,3 +1,19 @@
+wflo 1.6
+========
+
+Changes:
+
+* Added air density computation function.
+* Added Gaussian wake model.
+* Added Mosetti turbine cost model function.
+* Added partial Jensen (Frandsen) wake model.
+* Added function SwitchProfile().
+* Added a Navier-Stokes based wake simulation visualization.
+* Added wind speed scaling functions WindspeedLog and WindspeedHellmann.
+* Added several geolocation utility functions.
+* Several bugfixes.
+
+
 wflo 1.5
 ========
 

@@ -24,7 +24,8 @@ Yield(x, y, Adj)
 }
 
 \details{
-Adjusted yields are the projected yearly average yields dependent on wind speed, hub height and other settings at each point in the raster data. Annual Energy Production (AEP) at a specific location, weighted by a location quality correction factor, produces adjusted yields. This adjustment returns a better guess on the marketable yield at a specific point. For details on the data, see the data set description to this package.
+Adjusted yields are the projected yearly average yields dependent on wind speed, hub height and other settings at each point in the raster data. Annual Energy Production (AEP) at a specific location, weighted by a location quality correction factor, produces adjusted yields. This adjustment returns a better guess on the marketable yield at a specific point. For details on the data, see the data set description to this package.\cr
+Note that \code{\link{Profit}} internally multiplies the outcome of \code{Yield} by \code{e$FarmVars$Price} to obtain revenue. Users who replace the function by \code{e$Yield} need to provide that manually, if revenue is desired.
 }
 
 \value{
@@ -49,21 +50,17 @@ Yield(0.5, 0.7, Adj)
 ## also called 'Yield', embedded in environment e.
 ## Also, see the vignette.
 \donttest{
-if(requireNamespace("pso")){
-library(pso)
 e$Yield <- function(x, y, AEP) #x, y \in R
 {
 	return(x + y)
 }
 set.seed(1357)
-Result <- psoptim(par = runif(NumTurbines * 2), fn = Profit,
+Result <- pso::psoptim(par = runif(NumTurbines * 2), fn = Profit,
   lower = rep(0, NumTurbines * 2), upper = rep(1, NumTurbines * 2))
 Result
 rm(Yield, envir = e)
 }
 }
-}
-
 
 \keyword{Yield}
 \keyword{Profit}

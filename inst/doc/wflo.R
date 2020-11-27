@@ -26,7 +26,7 @@ NumTurbines <- 4
 set.seed(2763)
 Result <- optim(par = runif(NumTurbines * 2), fn = Profit,
   method = "L-BFGS-B", lower = rep(0, NumTurbines * 2),
-  upper = rep(1, NumTurbines * 2))
+  upper = rep(1, NumTurbines * 2), control = list(maxit = 10))
 Result
 
 
@@ -66,7 +66,8 @@ ShowWakePenalizers(Result)
 library(nloptr)
 set.seed(1357)
 Result <- crs2lm(x0 = runif(NumTurbines * 2), fn = Profit,
-  lower = rep(0, NumTurbines * 2), upper = rep(1, NumTurbines * 2))
+lower = rep(0, NumTurbines * 2),
+upper = rep(1, NumTurbines * 2), maxeval = 1000)
 Result
 
 
@@ -78,7 +79,7 @@ set.seed(1357)
 Dom = cbind(rep(0, 2 * NumTurbines), rep(1, 2 * NumTurbines))
 Result <- genoud(fn = Profit, nvars = 2 * NumTurbines,
   starting.values = runif(NumTurbines * 2), Domains = Dom,
-  boundary.enforcement = 2, print.level = 0)
+  boundary.enforcement = 2, print.level = 0, max.generations = 10)
 Result
 
 
@@ -88,7 +89,8 @@ Result
 library(pso)
 set.seed(1357)
 Result <- psoptim(par = runif(NumTurbines * 2), fn = Profit,
-  lower = rep(0, NumTurbines * 2), upper = rep(1, NumTurbines * 2))
+lower = rep(0, NumTurbines * 2),
+upper = rep(1, NumTurbines * 2), control = list(maxit = 100))
 Result
 
 
@@ -112,7 +114,7 @@ Wrapper <- function(X)
 }
 set.seed(1357)
 Result <- optim(par = runif(NumTurbines * 2), fn = Wrapper,
-  method = "SANN")
+  method = "SANN", control = list(maxit = 1000))
 Result
 
 
@@ -132,7 +134,8 @@ e$Cost <- function(x, y) #x, y \in R^n
 ###################################################
 set.seed(1357)
 Result <- psoptim(par = runif(NumTurbines * 2), fn = Profit,
-  lower = rep(0, NumTurbines * 2), upper = rep(1, NumTurbines * 2))
+lower = rep(0, NumTurbines * 2), upper = rep(1, NumTurbines * 2),
+control = list(maxit = 100))
 Result
 rm(Cost, envir = e)
 
@@ -177,7 +180,8 @@ e$Yield <- function(x, y, AEP) #x, y \in R
 ###################################################
 set.seed(1357)
 Result <- psoptim(par = runif(NumTurbines * 2), fn = Profit,
-  lower = rep(0, NumTurbines * 2), upper = rep(1, NumTurbines * 2))
+lower = rep(0, NumTurbines * 2), upper = rep(1, NumTurbines * 2),
+control = list(maxit = 100))
 Result
 rm(Yield, envir = e)
 
@@ -189,7 +193,7 @@ NumTurbines <- 4
 set.seed(1235)
 Result <- optim(par = runif(NumTurbines * 2), fn = Profit,
   method = "L-BFGS-B", lower = rep(0, NumTurbines * 2),
-  upper = rep(1, NumTurbines * 2))
+  upper = rep(1, NumTurbines * 2), control = list(maxit = 10))
 Contribs <- ProfitContributors(Result)
 Contribs
 PlotResult(Result, DoLabels = TRUE, Labels = Contribs[, 2])
@@ -210,7 +214,7 @@ ShowWakePenalizers(Result)
 ###################################################
 set.seed(1357)
 Result <- psoptim(par = runif(NumTurbines * 2), fn = Profit,
-  lower = rep(0, NumTurbines * 2), upper = rep(1, NumTurbines * 2))
+  lower = rep(0, NumTurbines * 2), upper = rep(1, NumTurbines * 2), control = list(maxit = 100))
 PlotResult(Result)
 
 
@@ -221,7 +225,7 @@ NumTurbines <- 4
 set.seed(1235)
 Result <- optim(par = runif(NumTurbines * 2), fn = Profit,
   method = "L-BFGS-B", lower = rep(0, NumTurbines * 2),
-  upper = rep(1, NumTurbines * 2))
+  upper = rep(1, NumTurbines * 2), control = list(maxit = 10))
 MyLabels <- ProfitContributors(Result)
 PlotResult(Result, DoLabels = TRUE, Labels = MyLabels[, 2])
 

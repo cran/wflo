@@ -8,7 +8,7 @@ Provided a wind direction, a point and a downwind length, computes the corner po
 }
 
 \usage{
-JensenTrapezoid(WindDir, Point, x)
+JensenTrapezoid(WindDir, Point, x, Margin = TRUE)
 }
 
 \arguments{
@@ -21,14 +21,17 @@ JensenTrapezoid(WindDir, Point, x)
 	\item{x}{
 		downwind distance of the cone in meters.
 	}
+	\item{Margin}{
+		specified whether to add a small margin to the distance parameter (i.e. internally, compute x * 1.1). Defaults to TRUE.
+	}
 }
 
 \value{
-\code{JensenTrapezoid} returns matrix of four columns (the four corner points) and two rows (x and y coordinates).
+\code{JensenTrapezoid} returns a matrix of four columns (the four corner points) and two rows (x and y coordinates).
 }
 
 \references{
-Jensen, N. O. (1983). A note on wind generator interaction. Roskilde: Risø National Laboratory. Risø-M, No. 2411
+Jensen, N. O. (1983). A note on wind generator interaction. Roskilde: Riso National Laboratory. Riso-M, No. 2411
 }
 
 \author{
