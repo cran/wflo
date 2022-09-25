@@ -86,17 +86,18 @@ GK2Index <- function(X, Y)
 
 GetFarmFromLonLat <- function(Top, Left, EdgeLen, DoPlot = FALSE)
 {
-  Invert <- function(x)
-  {
-    y <- x
-
-    for (i in 1:nrow(x))
-    {
-      y[nrow(x) - i + 1, ] <- x[i, ]
-    }
-
-    return(y)
-  }
+#  Invert <- function(x)
+#  {
+#    y <- x
+#
+#    for (i in 1:nrow(x))
+#    {
+#      y[nrow(x) - i + 1, ] <- x[i, ]
+#    }
+#
+#    return(y)
+#  }
+  Invert <- function(x) x[seq(from = nrow(x), to = 1, by = -1), ]
 
   Tiles <- EdgeLen / 200
 

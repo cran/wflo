@@ -1,3 +1,11 @@
+wflo 1.7
+========
+
+Changes:
+
+* Removed rgdal from import list.
+
+
 wflo 1.6
 ========
 
