@@ -47,7 +47,7 @@ PlotResult(Result)
 ##########################################
 #Will provide a somewhat better result
 #Necessary to install pso
-\donttest{
+\dontrun{
 NumTurbines <- 4
 Result <- pso::psoptim(par = runif(NumTurbines * 2), fn = Profit,
   lower = rep(0, NumTurbines * 2), upper = rep(1, NumTurbines * 2))

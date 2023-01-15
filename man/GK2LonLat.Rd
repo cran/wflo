@@ -37,7 +37,7 @@ Carsten Croonenbroeck
 }
 
 \examples{
-LonLat <- GK2LonLat(3702793, 5998319) # Will return c(12.09750, 54.07548).
+LonLat <- GK2LonLat(3702793, 5998319) # Will return c(12.09750, 54.07547).
 }
 
 \keyword{Geolocation}

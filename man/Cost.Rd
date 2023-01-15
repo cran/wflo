@@ -44,7 +44,7 @@ Cost(c(0.5, 0.7), c(0.2, 0.3))
 ## Replace the function by another function
 ## also called 'Cost', embedded in environment e.
 ## Also, see the vignette.
-\donttest{
+\dontrun{
 e$Cost <- function(x, y) #x, y \in R^n
 {
 	retVal <- rep(e$FarmVars$UnitCost, min(length(x), length(y)))
@@ -52,6 +52,7 @@ e$Cost <- function(x, y) #x, y \in R^n
 	return(retVal)
 }
 set.seed(1357)
+NumTurbines <- 4 # For example.
 Result <- pso::psoptim(par = runif(NumTurbines * 2), fn = Profit,
   lower = rep(0, NumTurbines * 2), upper = rep(1, NumTurbines * 2))
 Result

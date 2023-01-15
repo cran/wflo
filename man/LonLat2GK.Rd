@@ -37,7 +37,7 @@ Carsten Croonenbroeck
 }
 
 \examples{
-LonLat2GK(12.09750, 54.07548) # Will return c(3702793, 5998319).
+LonLat2GK(12.09750, 54.07548) # Will return c(3702793, 5998320).
 }
 
 \keyword{Geolocation}

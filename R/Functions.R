@@ -16,13 +16,14 @@ WindspeedHellmann <- function(v0, HH = 100, refHeight = 10, alpha = 1 / 7) v0 * 
 
 GK2LonLat <- function(X, Y)
 {
-  GK <- data.frame(cbind("X_GK" = X, "Y_GK" = Y))
+  From <- sf::st_crs("+proj=tmerc +lat_0=0 +lon_0=9 +k=1 +x_0=3500000 +y_0=0 +ellps=bessel +datum=potsdam +units=m +no_defs")
+  To <- sf::st_crs("+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0")
 
-  sp::coordinates(GK) <- c("X_GK", "Y_GK")
-  sp::proj4string(GK) <- sp::CRS("+proj=tmerc +lat_0=0 +lon_0=9 +k=1 +x_0=3500000 +y_0=0 +ellps=bessel +datum=potsdam +units=m +no_defs")
-  LonLat <- sp::spTransform(GK, sp::CRS("+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0"))
-  LonLat <- drop(LonLat@coords)
-  attr(LonLat, "names") <- NULL
+  GK <- sf::st_point(c(X, Y))
+  GK <- sf::st_sfc(GK, crs = From)
+
+  LonLat <- sf::st_transform(GK, crs = To)
+  LonLat <- c(LonLat[[1]][1], LonLat[[1]][2])
 
   return(LonLat)
 }
@@ -31,13 +32,14 @@ GK2LonLat <- function(X, Y)
 
 LonLat2GK <- function(Lon, Lat)
 {
-  LonLat <- data.frame(cbind("Lon" = Lon, "Lat" = Lat))
+  From <- sf::st_crs("+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0")
+  To <- sf::st_crs("+proj=tmerc +lat_0=0 +lon_0=9 +k=1 +x_0=3500000 +y_0=0 +ellps=bessel +datum=potsdam +units=m +no_defs")
 
-  sp::coordinates(LonLat) <- c("Lon", "Lat")
-  sp::proj4string(LonLat) <- sp::CRS("+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0")
-  GK <- sp::spTransform(LonLat, sp::CRS("+proj=tmerc +lat_0=0 +lon_0=9 +k=1 +x_0=3500000 +y_0=0 +ellps=bessel +datum=potsdam +units=m +no_defs"))
-  GK <- drop(GK@coords)
-  attr(GK, "names") <- NULL
+  LonLat <- sf::st_point(c(Lon, Lat))
+  LonLat <- sf::st_sfc(LonLat, crs = From)
+
+  GK <- sf::st_transform(LonLat, crs = To)
+  GK <- c(GK[[1]][1], GK[[1]][2])
 
   return(GK)
 }
@@ -122,10 +124,9 @@ GetFarmFromLonLat <- function(Top, Left, EdgeLen, DoPlot = FALSE)
 
   if (DoPlot)
   {
-    Test <- raster::raster(Temp$AdjustedYield)
     Proj <- "+proj=tmerc +lat_0=0 +lon_0=9 +k=1 +x_0=3500000 +y_0=0 +ellps=bessel +towgs84=598.1,73.7,418.2,0.202,0.045,-2.455,6.7 +units=m +no_defs"
-    raster::crs(Test) <- Proj
-    plot(Test)
+    Test <- terra::rast(Temp$AdjustedYield, Proj)
+    terra::plot(Test)
   }
 
   return(Temp)

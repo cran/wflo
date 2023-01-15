@@ -1,8 +1,8 @@
 Package: wflo
 Title: Data Set and Helper Functions for Wind Farm Layout Optimization
         Problems
-Version: 1.7
-Date: 2022-09-22
+Version: 1.8
+Date: 2022-12-14
 Authors@R: c(person("Carsten", "Croonenbroeck", email = "carsten.croonenbroeck@uni-rostock.de",
 				role = c("aut", "cre")),
 			 person("David", "Hennecke", email = "david.hennecke@uni-rostock.de", role = "ctb"))
@@ -13,16 +13,15 @@ Description: Provides a convenient data set, a set of helper functions, and a be
     setting for comparability among contributions. See Croonenbroeck, Carsten & Hennecke, David (2020)
     <doi:10.1016/j.energy.2020.119244>.
 Depends: R (>= 3.5.0)
-Imports: plotrix, progress, emstreeR, raster, sp
-Suggests: MASS, nloptr, pso, rgenoud, rgdal, snow, doSNOW, foreach,
-        parallel
+Imports: plotrix, progress, emstreeR, terra, sf
+Suggests: MASS, nloptr, pso, rgenoud, snow, doSNOW, foreach, parallel
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
 NeedsCompilation: no
-Packaged: 2022-09-24 19:14:41 UTC; ccroo
+Packaged: 2022-12-30 15:01:00 UTC; ccroo
 Author: Carsten Croonenbroeck [aut, cre],
   David Hennecke [ctb]
 Maintainer: Carsten Croonenbroeck <carsten.croonenbroeck@uni-rostock.de>
 Repository: CRAN
-Date/Publication: 2022-09-25 22:40:02 UTC
+Date/Publication: 2023-01-15 16:30:02 UTC

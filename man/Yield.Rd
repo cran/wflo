@@ -49,12 +49,13 @@ Yield(0.5, 0.7, Adj)
 ## Replace the function by another function
 ## also called 'Yield', embedded in environment e.
 ## Also, see the vignette.
-\donttest{
+\dontrun{
 e$Yield <- function(x, y, AEP) #x, y \in R
 {
 	return(x + y)
 }
 set.seed(1357)
+NumTurbines <- 4 # For example.
 Result <- pso::psoptim(par = runif(NumTurbines * 2), fn = Profit,
   lower = rep(0, NumTurbines * 2), upper = rep(1, NumTurbines * 2))
 Result

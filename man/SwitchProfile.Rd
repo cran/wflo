@@ -60,7 +60,7 @@ SwitchProfile(Profile2, Result)
 #backup before use.
 #Computation may be slow.
 
-\donttest{
+\dontrun{
 Result <- list(par = e$FarmVars$BenchmarkSolution)
 e$FarmData <- FarmData
 
@@ -124,7 +124,7 @@ for (i in 1:nrow(Profiles))
 #Be advised, computation may be very slow, even if run on modern
 #machines and even though using parallelization.
 
-\donttest{
+\dontrun{
 Result <- list(par = e$FarmVars$BenchmarkSolution)
 e$FarmData <- FarmData
 
@@ -195,7 +195,7 @@ snow::stopCluster(cl)
 #backup before use.
 #Computation may be slow.
 
-\donttest{
+\dontrun{
 e$FarmData <- FarmData
 
 SumProfit <- function(X)
