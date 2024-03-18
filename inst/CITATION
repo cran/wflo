@@ -1,16 +1,10 @@
 citHeader("To cite wflo in publications, please use:")
 
-citEntry(entry = "Article",
-  title        = "A Comparison of Optimizers in a Unified Standard for Optimization on Wind Farm Layout Optimization",
-  author       = c(person("Carsten", "Croonenbroeck"), person("David", "Hennecke")),
-  journal      = "Energy",
-  year         = "2020",
-  number       = "119244",
-  pages        = "1-15",
-  url          = "https://doi.org/10.1016/j.energy.2020.119244",
-
-  textVersion  =
-  paste("Croonenbroeck, Carsten & Hennecke, David (2020).",
-        "A Comparison of Optimizers in a Unified Standard for Optimization on Wind Farm Layout Optimization.",
-        "Energy, 119244, 1-15, https://doi.org/10.1016/j.energy.2020.119244")
-)
+bibentry(bibtype = "Article",
+         title = "A Comparison of Optimizers in a Unified Standard for Optimization on Wind Farm Layout Optimization",
+         author = c(person("Carsten", "Croonenbroeck"), person("David", "Hennecke")),
+         journal = "Energy",
+         year = "2020",
+         number = "119244",
+         pages = "1-15",
+         doi = "10.1016/j.energy.2020.119244")

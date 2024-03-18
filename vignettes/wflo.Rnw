@@ -166,12 +166,10 @@ par(Oldpar)
 \end{figure}
 
 \begin{figure}[t!]
-\centering
-<<PlotResult, echo = FALSE, fig = TRUE>>=
-PlotResult(Result)
-@
-\caption{PlotResult() showing the benchmark area, four turbines, L-BFGS-B optimizer.}
-\label{graph:PlotResult}
+  \centering
+  \includegraphics[width=13cm]{Fig4}\\
+  \caption{PlotResult() showing the benchmark area, four turbines, L-BFGS-B optimizer.}
+  \label{graph:PlotResult}
 \end{figure}
 
 \begin{figure}[t!]

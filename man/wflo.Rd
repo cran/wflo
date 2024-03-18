@@ -1,6 +1,7 @@
 \name{wflo}
 \docType{package}
 \alias{wflo}
+\alias{wflo-package}
 
 \title{Data set and functions for wind farm layout optimization.}
 

@@ -1,9 +1,24 @@
+wflo 1.9
+========
+
+Changes:
+
+* Fixed rare vignette issue.
+
+wflo 1.8
+========
+
+Changes:
+
+* Removed **raster** from import list.
+* Replaced \donttest by \dontrun for some examples as demanded by CRAN maintainers.
+
 wflo 1.7
 ========
 
 Changes:
 
-* Removed rgdal from import list.
+* Removed **rgdal** from import list.
 
 
 wflo 1.6
